@@ -39,25 +39,32 @@ class IRYMManager:
 
     async def initialize(self, data_dir: str = "data"):
         """Initializes the IRYM SDK and ingests data for RAG."""
-        # 1. Disable blocking interactive prompts for headless environment
+        # 1. Force load environment variables from local .env
+        from dotenv import load_dotenv
+        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+        load_dotenv(env_path)
+
+        # 2. Disable blocking interactive prompts for headless environment (Crucial!)
         config.AUTO_ACCEPT_FALLBACK = True
         
-        # 2. Initialize Service Registry
+        # 3. Initialize Service Registry
         init_irym()
         
-        # 3. Configure Providers (allows switching between OpenAI and Local via ENV)
-        llm_provider = os.getenv("LLM_PROVIDER", "auto")
-        vlm_provider = os.getenv("VLM_PROVIDER", "auto")
+        # 4. Configure Providers as requested by user
+        llm_provider = os.getenv("LLM_PROVIDER", "openai")
+        vlm_provider = os.getenv("VLM_PROVIDER", "local")
+        
+        print(f"[*] Configuring providers: LLM={llm_provider}, VLM={vlm_provider}")
         set_providers(llm_provider=llm_provider, vlm_provider=vlm_provider)
         
-        # 4. Start Connections and Lifecycle
+        # 5. Start Connections and Lifecycle
         await startup_irym()
         await lifecycle.startup()
 
-        # 5. Build Pipelines
+        # 6. Build Pipelines
         self.rag = get_rag_pipeline()
         
-        # Respect VLM preference: default to Local if available, else OpenAI
+        # Respect user preference: default to Local as requested
         prefer_local_vlm = os.getenv("PREFER_LOCAL_VLM", "true").lower() == "true"
         self.vlm = get_vlm_pipeline(prefer_local=prefer_local_vlm)
         
