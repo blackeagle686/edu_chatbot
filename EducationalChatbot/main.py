@@ -61,7 +61,10 @@ async def chat(
         response = await irym_manager.get_response(message, session_id=session_id, image_path=image_path)
         return JSONResponse({"response": response})
     except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
+        import traceback
+        print(f"[!] Critical Route Error: {e}")
+        traceback.print_exc()
+        return JSONResponse({"error": f"Server Error: {str(e)}"}, status_code=500)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

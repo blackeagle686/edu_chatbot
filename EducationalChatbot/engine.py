@@ -70,15 +70,22 @@ class IRYMManager:
 
     async def get_response(self, query: str, session_id: str = "default_user", image_path: str = None):
         """Queries the RAG pipeline or VLM for a response."""
+        import traceback
+        
         if not self.rag:
             raise RuntimeError("IRYM Manager not initialized. Call initialize() first.")
         
         # If an image is provided, use the VLM pipeline
         if image_path:
-            if not self.vlm:
-                self.vlm = get_vlm_pipeline()
-            print(f"[*] Using VLM for query: {query} with image: {image_path}")
-            return await self.vlm.ask(prompt=query, image_path=image_path, use_rag=True)
+            try:
+                if not self.vlm:
+                    self.vlm = get_vlm_pipeline()
+                print(f"[*] Using VLM for query: {query} with image: {image_path}")
+                return await self.vlm.ask(prompt=query, image_path=image_path, use_rag=True)
+            except Exception as e:
+                print(f"[!] VLM Error: {e}")
+                traceback.print_exc()
+                return f"VLM Error: {str(e)}"
 
         try:
             # Try RAG first for course-specific knowledge
@@ -86,6 +93,7 @@ class IRYMManager:
             return response
         except Exception as e:
             print(f"[!] RAG query failed: {e}. Falling back to general LLM.")
+            traceback.print_exc()
             # Fallback to general LLM if RAG fails (e.g. no documents matches)
             if not self.llm:
                  self.llm = container.get("llm")

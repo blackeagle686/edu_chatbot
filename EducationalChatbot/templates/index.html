@@ -156,10 +156,12 @@
         /* ── Append message row ── */
         function appendMessage(text, sender, imageUrl = null) {
             const row = document.createElement('div');
-            row.classList.add('message-row', sender === 'user' ? 'user-row' : '');
+            row.classList.add('message-row');
+            if (sender === 'user') row.classList.add('user-row');
 
             const avatar = document.createElement('div');
-            avatar.classList.add('msg-avatar', sender === 'user' ? 'user-av' : 'bot-av');
+            avatar.classList.add('msg-avatar');
+            avatar.classList.add(sender === 'user' ? 'user-av' : 'bot-av');
             avatar.innerHTML = sender === 'user'
                 ? '<i class="fas fa-user"></i>'
                 : '<i class="fas fa-robot"></i>';
