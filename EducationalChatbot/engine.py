@@ -1,5 +1,18 @@
 import os
+import sys
 import asyncio
+
+# Ensure IRYM_sdk is in the path if running from subfolder
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
+try:
+    from IRYM_sdk import init_irym_full, get_rag_pipeline
+except ImportError:
+    # If it's still not found, it might be in current dir or needs install
+    pass
+
 from IRYM_sdk import init_irym_full, get_rag_pipeline, get_llm
 from IRYM_sdk.core.lifecycle import lifecycle
 

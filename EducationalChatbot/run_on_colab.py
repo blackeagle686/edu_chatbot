@@ -7,14 +7,21 @@ def install(package):
 
 print("[*] Installing dependencies...")
 install("fastapi")
-install("uvicorn")
+install("uvicorn[standard]")
 install("jinja2")
 install("python-multipart")
 install("pyngrok")
-# Assuming IRYM_sdk is available in the current directory or can be installed
-# In Colab, the user would usually clone the repo first.
-# If it's not installed, we might need:
-# install("git+https://github.com/user/IRYM_sdk.git") 
+install("python-dotenv") # Required by IRYM_sdk
+
+# Automatically install the local IRYM_sdk folder
+parent_dir = os.path.dirname(os.path.abspath(__file__))
+sdk_dir = os.path.join(os.path.dirname(parent_dir), "IRYM_sdk")
+
+if os.path.exists(sdk_dir):
+    print(f"[*] Found IRYM_sdk at {sdk_dir}. Installing local version...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-e", sdk_dir])
+else:
+    print("[!] IRYM_sdk folder not found in parent directory. Ensure it is uploaded correctly.")
 
 from pyngrok import ngrok
 
