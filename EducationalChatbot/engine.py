@@ -1,3 +1,5 @@
+import os
+import sys
 import asyncio
 
 # Optimization for CUDA memory management to prevent fragmentation and OOM
