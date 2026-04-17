@@ -1,0 +1,16 @@
+# Course: Introduction to Artificial Intelligence
+
+## Module 1: What is AI?
+Artificial Intelligence (AI) is a branch of computer science that aims to create machines capable of performing tasks that typically require human intelligence. These tasks include problem-solving, pattern recognition, understanding natural language, and autonomous decision-making.
+
+## Module 2: Machine Learning
+Machine Learning (ML) is a subset of AI that focuses on building systems that learn from data. Instead of being explicitly programmed for a specific task, ML models identify patterns in data to make predictions or decisions.
+
+## Module 3: Neural Networks
+Neural networks are a type of machine learning model inspired by the structure of the human brain. They consist of layers of interconnected "neurons" that process information and learn complex representations.
+
+## Tips for Learning AI
+1. Start with the basics of mathematics (linear algebra, calculus, statistics).
+2. Learn a programming language like Python.
+3. Experiment with small projects like building a classifier.
+4. Stay curious and keep up with the latest research.

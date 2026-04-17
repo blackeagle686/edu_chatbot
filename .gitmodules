@@ -1,0 +1,3 @@
+[submodule "IRYM_sdk"]
+	path = IRYM_sdk
+	url = https://github.com/blackeagle686/IRYM_sdk.git
