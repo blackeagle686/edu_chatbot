@@ -18,6 +18,10 @@ app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), na
 @app.on_event("startup")
 async def startup_event():
     print("[*] FastAPI Startup: Initializing IRYM SDK components...")
+    
+    # Ensure uploads directory exists
+    os.makedirs(os.path.join(BASE_DIR, "uploads"), exist_ok=True)
+    
     # Initialize IRYM SDK
     data_dir = os.path.join(BASE_DIR, "data")
     await irym_manager.initialize(data_dir=data_dir)
