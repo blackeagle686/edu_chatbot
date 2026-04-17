@@ -6,20 +6,20 @@
 
 /* ── Design Tokens ───────────────────────────────────────── */
 :root {
-    --accent-1: #00d2ff;
-    --accent-2: #3a7bd5;
-    --accent-violet: #7f5af0;
-    --accent-pink: #e879f9;
-    --bg-1: #06040f;
-    --bg-2: #0d0b22;
-    --bg-3: #16122e;
-    --glass: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.10);
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --glass-border-strong: rgba(255, 255, 255, 0.22);
-    --text-primary: #f0eeff;
-    --text-muted: rgba(240, 238, 255, 0.55);
-    --shadow-glow: 0 0 40px rgba(0, 210, 255, 0.15);
+    --accent-1: #ff8c00;
+    --accent-2: #f97316;
+    --accent-violet: #fbbf24;
+    --accent-pink: #ea580c;
+    --bg-1: #0f0702;
+    --bg-2: #1a0f05;
+    --bg-3: #261408;
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-hover: rgba(255, 255, 255, 0.09);
+    --glass-border: rgba(255, 255, 255, 0.11);
+    --glass-border-strong: rgba(255, 255, 255, 0.20);
+    --text-primary: #fff1e6;
+    --text-muted: rgba(255, 241, 230, 0.5);
+    --shadow-glow: 0 0 40px rgba(255, 140, 0, 0.15);
     --radius-lg: 24px;
     --radius-md: 16px;
     --radius-sm: 10px;
@@ -52,9 +52,9 @@ body::before {
     position: fixed;
     inset: 0;
     background:
-        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(127, 90, 240, 0.18) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(0, 210, 255, 0.14) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(58, 123, 213, 0.10) 0%, transparent 50%),
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(251, 191, 36, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(255, 140, 0, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
         linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
     z-index: 0;
     pointer-events: none;
@@ -67,7 +67,7 @@ body::after {
     width: 500px;
     height: 500px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(127, 90, 240, 0.08) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(234, 88, 12, 0.07) 0%, transparent 70%);
     top: -150px;
     right: -100px;
     animation: floatOrb 12s ease-in-out infinite alternate;

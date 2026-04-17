@@ -217,11 +217,16 @@
         }
 
         /* ── Submit ── */
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        let isProcessing = false;
+
+        async function handleSubmit(e) {
+            if (e) e.preventDefault();
+            if (isProcessing) return;
+
             const message = userInput.value.trim();
             if (!message && !selectedImage) return;
 
+            isProcessing = true;
             const prompt = message || 'Analyze this image.';
             const currentImage = selectedImage;
             const imageUrl = currentImage ? URL.createObjectURL(currentImage) : null;
@@ -240,34 +245,40 @@
             try {
                 const formData = new FormData();
                 formData.append('message', prompt);
-                if (currentImage) formData.append('image', currentImage);
+                if (currentImage) {
+                    formData.append('image', currentImage);
+                }
 
-                const response = await fetch('/chat', { method: 'POST', body: formData });
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    body: formData
+                });
+
                 const data = await response.json();
 
-                chatMessages.removeChild(loadingRow);
+                if (loadingRow && loadingRow.parentNode) {
+                    chatMessages.removeChild(loadingRow);
+                }
 
                 const reply = data.response
                     || ('Sorry, I encountered an error: ' + (data.error || 'Unknown error'));
                 appendMessage(reply, 'bot');
 
             } catch (err) {
-                if (loadingRow.parentNode) chatMessages.removeChild(loadingRow);
+                if (loadingRow && loadingRow.parentNode) {
+                    chatMessages.removeChild(loadingRow);
+                }
                 appendMessage('Failed to connect to the server. Please try again.', 'bot');
-                console.error(err);
+                console.error('Chat error:', err);
             } finally {
+                isProcessing = false;
                 sendBtn.disabled = false;
                 sendBtn.style.opacity = '1';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-        });
+        }
 
-        /* ── Enter key (allow Shift+Enter for newlines) ── */
-        userInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                chatForm.dispatchEvent(new Event('submit'));
-            }
-        });
+        chatForm.addEventListener('submit', handleSubmit);
     </script>
 </body>
 
