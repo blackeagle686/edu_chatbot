@@ -1,10 +1,12 @@
 import os
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from engine import irym_manager
 import uvicorn
+import shutil
+import uuid
 
 app = FastAPI(title="IRYM Educational Chatbot")
 
@@ -30,9 +32,23 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/chat")
-async def chat(message: str = Form(...), session_id: str = Form("default_user")):
+async def chat(
+    message: str = Form(...), 
+    session_id: str = Form("default_user"),
+    image: UploadFile = File(None)
+):
     try:
-        response = await irym_manager.get_response(message, session_id=session_id)
+        image_path = None
+        if image and image.filename:
+            # Create a unique filename to avoid collisions
+            ext = os.path.splitext(image.filename)[1]
+            filename = f"{uuid.uuid4()}{ext}"
+            image_path = os.path.join(BASE_DIR, "uploads", filename)
+            
+            with open(image_path, "wb") as buffer:
+                shutil.copyfileobj(image.file, buffer)
+        
+        response = await irym_manager.get_response(message, session_id=session_id, image_path=image_path)
         return JSONResponse({"response": response})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)

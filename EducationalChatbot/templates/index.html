@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark px-4">
@@ -26,14 +28,25 @@
     <div class="chat-container">
         <div class="chat-messages" id="chat-messages">
             <div class="message bot">
-                Hello! I am your IRYM Educational Assistant. Ask me anything about your courses!
+                Hello! I am your IRYM Educational Assistant. Ask me anything about your courses! Now I can also analyze
+                images you upload!
             </div>
         </div>
-        
+
+        <div id="image-preview-container">
+            <img id="image-preview" class="preview-image" src="">
+            <button type="button" class="remove-image" id="remove-image-btn"><i class="fas fa-times"></i></button>
+        </div>
+
         <div class="chat-input-area">
             <form id="chat-form">
                 <div class="input-group">
-                    <input type="text" id="user-input" class="form-control" placeholder="Type your question here..." autocomplete="off">
+                    <input type="file" id="image-input" accept="image/*" style="display: none;">
+                    <button type="button" class="upload-btn" onclick="document.getElementById('image-input').click()">
+                        <i class="fas fa-image"></i>
+                    </button>
+                    <input type="text" id="user-input" class="form-control" placeholder="Type your question here..."
+                        autocomplete="off">
                     <button class="btn btn-send" type="submit">
                         <i class="fas fa-paper-plane"></i>
                     </button>
@@ -44,16 +57,53 @@
 
     <!-- Bootstrap JS & Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
+        const imageInput = document.getElementById('image-input');
         const chatMessages = document.getElementById('chat-messages');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const removeImageBtn = document.getElementById('remove-image-btn');
 
-        function appendMessage(text, sender) {
+        let selectedImage = null;
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                selectedImage = file;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    imagePreview.src = event.target.result;
+                    imagePreviewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        removeImageBtn.addEventListener('click', () => {
+            selectedImage = null;
+            imageInput.value = '';
+            imagePreviewContainer.style.display = 'none';
+            imagePreview.src = '';
+        });
+
+        function appendMessage(text, sender, imageUrl = null) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', sender);
-            messageDiv.innerText = text;
+
+            if (imageUrl) {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.classList.add('chat-img');
+                messageDiv.appendChild(img);
+            }
+
+            const textSpan = document.createElement('span');
+            textSpan.innerText = text;
+            messageDiv.appendChild(textSpan);
+
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
@@ -70,37 +120,55 @@
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const message = userInput.value.trim();
-            if (!message) return;
+            if (!message && !selectedImage) return;
 
-            appendMessage(message, 'user');
+            // In case of image only, use a default prompt if message is empty
+            const prompt = message || "Analyze this image.";
+
+            const currentSelectedImage = selectedImage;
+            const imageUrl = currentSelectedImage ? URL.createObjectURL(currentSelectedImage) : null;
+
+            appendMessage(prompt, 'user', imageUrl);
+
+            // Reset input and preview
             userInput.value = '';
+            selectedImage = null;
+            imageInput.value = '';
+            imagePreviewContainer.style.display = 'none';
+            imagePreview.src = '';
 
             const loading = appendLoading();
 
             try {
                 const formData = new FormData();
-                formData.append('message', message);
-                
+                formData.append('message', prompt);
+                if (currentSelectedImage) {
+                    formData.append('image', currentSelectedImage);
+                }
+
                 const response = await fetch('/chat', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 chatMessages.removeChild(loading);
-                
+
                 if (data.response) {
                     appendMessage(data.response, 'bot');
                 } else {
                     appendMessage("Sorry, I encountered an error: " + (data.error || "Unknown error"), 'bot');
                 }
             } catch (error) {
-                chatMessages.removeChild(loading);
+                if (loading && loading.parentNode) {
+                    chatMessages.removeChild(loading);
+                }
                 appendMessage("Failed to connect to the server.", "bot");
                 console.error(error);
             }
         });
     </script>
 </body>
+
 </html>
