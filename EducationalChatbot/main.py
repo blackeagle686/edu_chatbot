@@ -15,9 +15,11 @@ app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), na
 
 @app.on_event("startup")
 async def startup_event():
+    print("[*] FastAPI Startup: Initializing IRYM SDK components...")
     # Initialize IRYM SDK
     data_dir = os.path.join(BASE_DIR, "data")
     await irym_manager.initialize(data_dir=data_dir)
+    print("[+] FastAPI Startup: Complete. Server ready.")
 
 @app.on_event("shutdown")
 async def shutdown_event():

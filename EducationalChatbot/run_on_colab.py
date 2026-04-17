@@ -34,7 +34,8 @@ if NGROK_AUTH_TOKEN:
 
 print("[*] Starting ngrok tunnel...")
 try:
-    public_url = ngrok.connect(PORT).public_url
+    # Use explicit 127.0.0.1 to avoid IPv6 localhost issues
+    public_url = ngrok.connect(addr=f"127.0.0.1:{PORT}", proto="http").public_url
     print(f"\n[!] Public URL: {public_url}")
     print("[!] Open this URL in your browser to access the IRYM Educational Chatbot.\n")
 except Exception as e:
