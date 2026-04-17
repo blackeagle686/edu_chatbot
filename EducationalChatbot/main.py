@@ -25,6 +25,12 @@ async def startup_event():
     # Initialize IRYM SDK
     data_dir = os.path.join(BASE_DIR, "data")
     await irym_manager.initialize(data_dir=data_dir)
+    
+    # Log configured providers
+    from IRYM_sdk import get_providers
+    providers = get_providers()
+    print(f"[+] IRYM SDK Providers: LLM={providers.get('llm')}, VLM={providers.get('vlm')}")
+    
     print("[+] FastAPI Startup: Complete. Server ready.")
 
 @app.on_event("shutdown")

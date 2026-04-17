@@ -8,12 +8,26 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 try:
-    from IRYM_sdk import init_irym_full, get_rag_pipeline, get_vlm_pipeline
+    from IRYM_sdk import (
+        init_irym, 
+        startup_irym, 
+        get_rag_pipeline, 
+        get_vlm_pipeline, 
+        set_providers
+    )
     from IRYM_sdk.core.container import container
+    from IRYM_sdk.core.config import config
 except ImportError:
     # Fallback to absolute imports if needed
-    from IRYM_sdk.IRYM import init_irym_full, get_rag_pipeline, get_vlm_pipeline
+    from IRYM_sdk.IRYM import (
+        init_irym, 
+        startup_irym, 
+        get_rag_pipeline, 
+        get_vlm_pipeline, 
+        set_providers
+    )
     from IRYM_sdk.core.container import container
+    from IRYM_sdk.core.config import config
 
 from IRYM_sdk.core.lifecycle import lifecycle
 
@@ -25,10 +39,27 @@ class IRYMManager:
 
     async def initialize(self, data_dir: str = "data"):
         """Initializes the IRYM SDK and ingests data for RAG."""
-        # Ensure we are in a proper async environment
-        await init_irym_full()
+        # 1. Disable blocking interactive prompts for headless environment
+        config.AUTO_ACCEPT_FALLBACK = True
+        
+        # 2. Initialize Service Registry
+        init_irym()
+        
+        # 3. Configure Providers (allows switching between OpenAI and Local via ENV)
+        llm_provider = os.getenv("LLM_PROVIDER", "auto")
+        vlm_provider = os.getenv("VLM_PROVIDER", "auto")
+        set_providers(llm_provider=llm_provider, vlm_provider=vlm_provider)
+        
+        # 4. Start Connections and Lifecycle
+        await startup_irym()
+        await lifecycle.startup()
+
+        # 5. Build Pipelines
         self.rag = get_rag_pipeline()
-        self.vlm = get_vlm_pipeline()
+        
+        # Respect VLM preference: default to Local if available, else OpenAI
+        prefer_local_vlm = os.getenv("PREFER_LOCAL_VLM", "true").lower() == "true"
+        self.vlm = get_vlm_pipeline(prefer_local=prefer_local_vlm)
         
         # Ingest educational data if the directory exists
         if os.path.exists(data_dir) and os.listdir(data_dir):

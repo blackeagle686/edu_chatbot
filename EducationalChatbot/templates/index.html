@@ -105,6 +105,18 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        /* ── Helpers (must be first) ── */
+        function now() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function renderMarkdown(text) {
+            if (typeof marked !== 'undefined') {
+                return marked.parse(text);
+            }
+            return text.replace(/\n/g, '<br>');
+        }
+
         /* ── DOM refs ── */
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
@@ -119,19 +131,6 @@
 
         /* ── Stamp welcome time ── */
         document.getElementById('welcome-time').textContent = now();
-
-        /* ── Helpers ── */
-        function now() {
-            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function renderMarkdown(text) {
-            if (typeof marked !== 'undefined') {
-                // Sanitise newlines so marked renders them nicely
-                return marked.parse(text);
-            }
-            return text.replace(/\n/g, '<br>');
-        }
 
         /* ── Image pick ── */
         imageInput.addEventListener('change', (e) => {
