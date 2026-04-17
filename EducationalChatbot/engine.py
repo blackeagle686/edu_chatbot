@@ -1,6 +1,7 @@
-import os
-import sys
 import asyncio
+
+# Optimization for CUDA memory management to prevent fragmentation and OOM
+os.environ["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
 
 # Ensure IRYM_sdk is in the path if running from subfolder
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
