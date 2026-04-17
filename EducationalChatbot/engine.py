@@ -9,11 +9,12 @@ if parent_dir not in sys.path:
 
 try:
     from IRYM_sdk import init_irym_full, get_rag_pipeline
+    from IRYM_sdk.core.container import container
 except ImportError:
-    # If it's still not found, it might be in current dir or needs install
-    pass
+    # Fallback to absolute imports if needed
+    from IRYM_sdk.IRYM import init_irym_full, get_rag_pipeline
+    from IRYM_sdk.core.container import container
 
-from IRYM_sdk import init_irym_full, get_rag_pipeline, get_llm
 from IRYM_sdk.core.lifecycle import lifecycle
 
 class IRYMManager:
