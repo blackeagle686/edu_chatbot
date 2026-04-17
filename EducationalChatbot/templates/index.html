@@ -5,167 +5,267 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IRYM Educational Chatbot</title>
+    <meta name="description"
+        content="IRYM Educational Assistant – AI-powered learning with vision and RAG capabilities.">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js (Markdown → HTML) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark px-4">
-        <a class="navbar-brand fw-bold" href="#">
-            <i class="fas fa-brain me-2"></i>IRYM Master
+    <!-- ───────────── Navbar ───────────── -->
+    <nav class="navbar">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-brain"></i>
+            IRYM Master
         </a>
-        <div class="ms-auto text-light opacity-75 small">
-            Empowering Learning with AI
+        <div class="d-flex align-items-center gap-3">
+            <span class="navbar-tagline d-none d-sm-block">Empowering Learning with AI</span>
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                Online
+            </div>
         </div>
     </nav>
 
+    <!-- ───────────── Chat Container ───────────── -->
     <div class="chat-container">
-        <div class="chat-messages" id="chat-messages">
-            <div class="message bot">
-                Hello! I am your IRYM Educational Assistant. Ask me anything about your courses! Now I can also analyze
-                images you upload!
+
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="bot-avatar-lg">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="chat-header-info">
+                <h6>IRYM Educational Assistant</h6>
+                <small>Ask me anything · Vision-enabled · RAG-powered</small>
             </div>
         </div>
 
-        <div id="image-preview-container">
-            <img id="image-preview" class="preview-image" src="">
-            <button type="button" class="remove-image" id="remove-image-btn"><i class="fas fa-times"></i></button>
+        <!-- Messages -->
+        <div class="chat-messages" id="chat-messages">
+
+            <div class="chat-divider"><span>Today</span></div>
+
+            <!-- Welcome message -->
+            <div class="message-row">
+                <div class="msg-avatar bot-av"><i class="fas fa-robot"></i></div>
+                <div>
+                    <div class="message bot welcome">
+                        👋 Hello! I'm your <strong>IRYM Educational Assistant</strong>.<br>
+                        Ask me anything about your courses, or upload an image for AI-powered visual analysis!
+                        <span class="msg-time" id="welcome-time"></span>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
+        <!-- ── Image Preview Strip ── -->
+        <div id="image-preview-container">
+            <img id="image-preview" class="preview-image" src="" alt="Preview">
+            <span class="preview-label"><i class="fas fa-image me-1"></i>Image ready to send</span>
+            <button type="button" class="remove-image" id="remove-image-btn" title="Remove image">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- ── Input ── -->
         <div class="chat-input-area">
             <form id="chat-form">
                 <div class="input-group">
-                    <input type="file" id="image-input" accept="image/*" style="display: none;">
-                    <button type="button" class="upload-btn" onclick="document.getElementById('image-input').click()">
-                        <i class="fas fa-image"></i>
+                    <input type="file" id="image-input" accept="image/*" style="display:none;">
+                    <button type="button" class="upload-btn" id="upload-btn"
+                        onclick="document.getElementById('image-input').click()" title="Attach image">
+                        <i class="fas fa-paperclip"></i>
                     </button>
-                    <input type="text" id="user-input" class="form-control" placeholder="Type your question here..."
-                        autocomplete="off">
-                    <button class="btn btn-send" type="submit">
+                    <input type="text" id="user-input" class="form-control"
+                        placeholder="Ask a question or describe an image…" autocomplete="off">
+                    <button class="btn-send" type="submit" id="send-btn" title="Send">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- Bootstrap JS & Popper -->
+    </div><!-- /.chat-container -->
+
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        /* ── DOM refs ── */
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const imageInput = document.getElementById('image-input');
         const chatMessages = document.getElementById('chat-messages');
-        const imagePreviewContainer = document.getElementById('image-preview-container');
-        const imagePreview = document.getElementById('image-preview');
-        const removeImageBtn = document.getElementById('remove-image-btn');
+        const imgPreviewC = document.getElementById('image-preview-container');
+        const imgPreview = document.getElementById('image-preview');
+        const removeBtn = document.getElementById('remove-image-btn');
+        const sendBtn = document.getElementById('send-btn');
 
         let selectedImage = null;
 
+        /* ── Stamp welcome time ── */
+        document.getElementById('welcome-time').textContent = now();
+
+        /* ── Helpers ── */
+        function now() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function renderMarkdown(text) {
+            if (typeof marked !== 'undefined') {
+                // Sanitise newlines so marked renders them nicely
+                return marked.parse(text);
+            }
+            return text.replace(/\n/g, '<br>');
+        }
+
+        /* ── Image pick ── */
         imageInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) {
-                selectedImage = file;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    imagePreview.src = event.target.result;
-                    imagePreviewContainer.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
+            if (!file) return;
+            selectedImage = file;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                imgPreview.src = ev.target.result;
+                imgPreviewC.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
         });
 
-        removeImageBtn.addEventListener('click', () => {
+        removeBtn.addEventListener('click', clearImage);
+        function clearImage() {
             selectedImage = null;
             imageInput.value = '';
-            imagePreviewContainer.style.display = 'none';
-            imagePreview.src = '';
-        });
+            imgPreviewC.style.display = 'none';
+            imgPreview.src = '';
+        }
 
+        /* ── Append message row ── */
         function appendMessage(text, sender, imageUrl = null) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', sender);
+            const row = document.createElement('div');
+            row.classList.add('message-row', sender === 'user' ? 'user-row' : '');
+
+            const avatar = document.createElement('div');
+            avatar.classList.add('msg-avatar', sender === 'user' ? 'user-av' : 'bot-av');
+            avatar.innerHTML = sender === 'user'
+                ? '<i class="fas fa-user"></i>'
+                : '<i class="fas fa-robot"></i>';
+
+            const bubble = document.createElement('div');
+            bubble.classList.add('message', sender);
 
             if (imageUrl) {
                 const img = document.createElement('img');
                 img.src = imageUrl;
                 img.classList.add('chat-img');
-                messageDiv.appendChild(img);
+                bubble.appendChild(img);
             }
 
-            const textSpan = document.createElement('span');
-            textSpan.innerText = text;
-            messageDiv.appendChild(textSpan);
+            const content = document.createElement('div');
+            content.classList.add('msg-content');
+            if (sender === 'bot') {
+                content.innerHTML = renderMarkdown(text);
+            } else {
+                content.textContent = text;
+            }
+            bubble.appendChild(content);
 
-            chatMessages.appendChild(messageDiv);
+            const time = document.createElement('span');
+            time.classList.add('msg-time');
+            time.textContent = now();
+            bubble.appendChild(time);
+
+            row.appendChild(avatar);
+            row.appendChild(bubble);
+
+            chatMessages.appendChild(row);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
+        /* ── Loading indicator ── */
         function appendLoading() {
-            const loadingDiv = document.createElement('div');
-            loadingDiv.classList.add('message', 'bot', 'loading-msg');
-            loadingDiv.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
-            chatMessages.appendChild(loadingDiv);
+            const row = document.createElement('div');
+            row.classList.add('message-row');
+
+            const avatar = document.createElement('div');
+            avatar.classList.add('msg-avatar', 'bot-av');
+            avatar.innerHTML = '<i class="fas fa-robot"></i>';
+
+            const bubble = document.createElement('div');
+            bubble.classList.add('message', 'bot', 'loading-msg');
+            bubble.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+
+            row.appendChild(avatar);
+            row.appendChild(bubble);
+            chatMessages.appendChild(row);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-            return loadingDiv;
+            return row;
         }
 
+        /* ── Submit ── */
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const message = userInput.value.trim();
             if (!message && !selectedImage) return;
 
-            // In case of image only, use a default prompt if message is empty
-            const prompt = message || "Analyze this image.";
-
-            const currentSelectedImage = selectedImage;
-            const imageUrl = currentSelectedImage ? URL.createObjectURL(currentSelectedImage) : null;
+            const prompt = message || 'Analyze this image.';
+            const currentImage = selectedImage;
+            const imageUrl = currentImage ? URL.createObjectURL(currentImage) : null;
 
             appendMessage(prompt, 'user', imageUrl);
 
-            // Reset input and preview
             userInput.value = '';
-            selectedImage = null;
-            imageInput.value = '';
-            imagePreviewContainer.style.display = 'none';
-            imagePreview.src = '';
+            clearImage();
 
-            const loading = appendLoading();
+            // Disable send while waiting
+            sendBtn.disabled = true;
+            sendBtn.style.opacity = '0.6';
+
+            const loadingRow = appendLoading();
 
             try {
                 const formData = new FormData();
                 formData.append('message', prompt);
-                if (currentSelectedImage) {
-                    formData.append('image', currentSelectedImage);
-                }
+                if (currentImage) formData.append('image', currentImage);
 
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    body: formData
-                });
-
+                const response = await fetch('/chat', { method: 'POST', body: formData });
                 const data = await response.json();
 
-                chatMessages.removeChild(loading);
+                chatMessages.removeChild(loadingRow);
 
-                if (data.response) {
-                    appendMessage(data.response, 'bot');
-                } else {
-                    appendMessage("Sorry, I encountered an error: " + (data.error || "Unknown error"), 'bot');
-                }
-            } catch (error) {
-                if (loading && loading.parentNode) {
-                    chatMessages.removeChild(loading);
-                }
-                appendMessage("Failed to connect to the server.", "bot");
-                console.error(error);
+                const reply = data.response
+                    || ('Sorry, I encountered an error: ' + (data.error || 'Unknown error'));
+                appendMessage(reply, 'bot');
+
+            } catch (err) {
+                if (loadingRow.parentNode) chatMessages.removeChild(loadingRow);
+                appendMessage('Failed to connect to the server. Please try again.', 'bot');
+                console.error(err);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.style.opacity = '1';
+            }
+        });
+
+        /* ── Enter key (allow Shift+Enter for newlines) ── */
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
             }
         });
     </script>
