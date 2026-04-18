@@ -89,34 +89,38 @@
 
 <body>
 
-    <!-- ───────────── Navbar ───────────── -->
+    <!-- ── Navbar ── -->
     <nav class="navbar">
         <a class="navbar-brand" href="/">
-            <i class="fas fa-brain"></i>
-            Wasla Master
+            <i class="fas fa-brain"></i> Wasla Master
         </a>
-        <div class="d-flex align-items-center gap-3">
-            <div class="form-check form-switch text-light mb-0" style="margin-right: 15px;">
-                <input class="form-check-input" type="checkbox" id="role-switch" style="cursor: pointer;" {% if user and
-                    user.role=='helper' %}checked{% endif %}>
-                <label class="form-check-label" for="role-switch" id="role-label"
-                    style="cursor: pointer; padding-top: 2px;">
+        <div class="d-flex align-items-center gap-4">
+            <!-- Role Toggle -->
+            <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
+                <input class="form-check-input" type="checkbox" id="role-switch" {% if user and user.role=='helper'
+                    %}checked{% endif %} style="cursor:pointer; width:36px; height:18px;">
+                <label class="form-check-label text-light fw-semibold m-0" for="role-switch" id="role-label"
+                    style="cursor:pointer; font-size:0.85rem; letter-spacing:0.03em;">
                     {{ 'Helper Mode' if user and user.role == 'helper' else 'Learner Mode' }}
                 </label>
             </div>
-            <span class="navbar-tagline d-none d-sm-block">Empowering Learning with AI</span>
-            <div class="status-pill">
+
+            <!-- Status Pill -->
+            <div class="status-pill d-none d-sm-flex">
                 <span class="status-dot"></span>
                 {% if user %}
-                <i class="fas fa-user me-1"></i>{{ user.username }}
+                <i class="fas fa-user mx-1"></i>{{ user.username }}
                 {% else %}
                 Online
                 {% endif %}
             </div>
+
+            <!-- Logout -->
             {% if user %}
-            <a href="/logout" title="Logout"
-                style="color:rgba(255,235,200,0.55); font-size:0.9rem; text-decoration:none; transition: color 0.2s;"
-                onmouseover="this.style.color='#ff8c00'" onmouseout="this.style.color='rgba(255,235,200,0.55)'">
+            <a href="/logout" title="Logout" class="d-flex align-items-center gap-2 text-decoration-none"
+                style="font-size:0.85rem; font-weight:600; color:var(--txt-m); transition:color 0.2s;"
+                onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='var(--txt-m)'">
+                <span class="d-none d-md-inline">Logout</span>
                 <i class="fas fa-sign-out-alt"></i>
             </a>
             {% endif %}
