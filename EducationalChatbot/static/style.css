@@ -1543,3 +1543,100 @@ document para:last-child {
 .nav-logout-link:hover {
     color: var(--secondary);
 }
+
+/* ── Footer ─────────────────────────────────────────────────── */
+footer {
+    background: rgba(14, 14, 14, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--brd);
+    padding: 4rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    text-align: center;
+    margin-top: auto;
+}
+
+[data-theme="light"] footer {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+footer .footer-brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    background: var(--grad-w);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+footer .footer-brand i {
+    -webkit-text-fill-color: initial;
+    color: var(--secondary);
+}
+
+footer .copy {
+    font-size: 0.9rem;
+    color: var(--txt-m);
+    max-width: 600px;
+    line-height: 1.7;
+}
+
+footer .social-links {
+    display: flex;
+    gap: 1.8rem;
+    margin-top: 0.5rem;
+}
+
+footer .social-link {
+    color: var(--txt-m);
+    font-size: 1.4rem;
+    transition: all var(--ease);
+}
+
+footer .social-link:hover {
+    color: var(--secondary);
+    transform: translateY(-4px);
+    filter: drop-shadow(0 0 8px rgba(255, 106, 0, 0.4));
+}
+
+/* ── Auth Navbar Enhancement ────────────────────────────────── */
+.navbar-auth {
+    background: transparent !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    padding: 1.5rem 2.5rem !important;
+}
+
+.navbar-auth .navbar-brand {
+    font-size: 1.5rem !important;
+}
+
+.navbar-auth .nav-pill {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--brd-full);
+    padding: 0.6rem 1.4rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-auth .nav-pill:hover {
+    background: var(--grad);
+    border-color: transparent;
+    color: #fff;
+}
+
+@media (max-width: 600px) {
+    .navbar-auth {
+        padding: 1rem 1.25rem !important;
+    }
+    
+    .navbar-auth .navbar-brand {
+        font-size: 1.2rem !important;
+    }
+}
