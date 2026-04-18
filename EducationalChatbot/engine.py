@@ -105,6 +105,22 @@ class IRYMManager:
                 traceback.print_exc()
                 return f"VLM Error: {str(e)}"
 
+        # Basic router to prevent RAG from hallucinating on simple greetings
+        import re
+        cleaned_query = re.sub(r'[^\w\s]', '', query.lower().strip())
+        chit_chat_phrases = {
+            "hi", "hello", "hey", "thanks", "thank you", "bye", "goodbye", "ok", 
+            "okay", "good morning", "good evening", "how are you", "whats up", "sup"
+        }
+        
+        is_conversational = cleaned_query in chit_chat_phrases
+
+        if is_conversational:
+            print("[*] Query identified as casual conversation. Bypassing RAG.")
+            if not self.llm:
+                 self.llm = container.get("llm")
+            return await self.llm.generate(refined_query, session_id=session_id)
+
         try:
             # Try RAG first for course-specific knowledge
             response = await self.rag.query(refined_query, session_id=session_id)
