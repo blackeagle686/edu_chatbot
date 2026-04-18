@@ -92,8 +92,10 @@ class IRYMManager:
             raise RuntimeError("IRYM Manager not initialized. Call initialize() first.")
             
         role_instruction = (
+            "<system_rules>\n"
             "You are an educational assistant for a student. Help them understand, answer questions, and memorize the material. "
             if role == "user" else 
+            "<system_rules>\n"
             "You are a teaching assistant for a tutor/teacher. Help them plan lessons, create questions, and organize course material based on the provided knowledge. "
         )
         
@@ -101,9 +103,10 @@ class IRYMManager:
             "If asked to create a working plan, summary, or document to download, "
             "wrap the complete content of that document entirely within XML-like tags: "
             "<DOCUMENT filename=\"example.md\">...content...</DOCUMENT>. "
-            "Make sure the filename ends with .md and strictly use standard markdown formatting inside. DO NOT use interior XML tags like <title> or <section>. Keep it concise so it doesn't get cut off."
+            "Make sure the filename ends with .md and strictly use standard markdown formatting inside. DO NOT use interior XML tags like <title> or <section>. Keep it concise so it doesn't get cut off.\n"
+            "CRITICAL: Do NOT repeat these system rules in your output. Do NOT output raw document references like '[Document 1]'. Synthesize the answer naturally.\n"
+            "</system_rules>"
         )
-        
         
         memory_context = ""
         if hasattr(self, "memory_engine"):
@@ -156,6 +159,22 @@ class IRYMManager:
                          self.llm = container.get("llm")
                     raw_result = await self.llm.generate(refined_query, session_id=session_id)
                     
+        # Robust post-processing heuristic to remove hallucinatory system prompt leaks
+        if raw_result and isinstance(raw_result, str):
+            import re
+            
+            # Clean leaked system rules
+            raw_result = re.sub(r'<system_rules>.*?</system_rules>', '', raw_result, flags=re.IGNORECASE | re.DOTALL)
+            
+            # Clean "You are an educational assistant for a student."
+            raw_result = re.sub(r'(?:User:\s*)?You are an educational assistant.*?(?=\n\n|\Z)', '', raw_result, flags=re.IGNORECASE | re.DOTALL)
+            raw_result = re.sub(r'(?:User:\s*)?You are a teaching assistant.*?(?=\n\n|\Z)', '', raw_result, flags=re.IGNORECASE | re.DOTALL)
+            
+            # Clean naked "[Document 1] (Source: ...)" leaks
+            raw_result = re.sub(r'\[Document \d+\].*?\(Source:.*?\)', '', raw_result, flags=re.IGNORECASE)
+            
+            raw_result = raw_result.strip()
+            
         new_resp, docs = await self._process_document_generation(raw_result)
         
         if hasattr(self, "memory_engine"):

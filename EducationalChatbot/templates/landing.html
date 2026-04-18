@@ -757,6 +757,13 @@
             }
         }
     </style>
+    <!-- Prevent FOUC Theme Script -->
+    <script>
+        const savedTheme = localStorage.getItem('wasla-theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
 </head>
 
 <body>
@@ -770,6 +777,13 @@
             <a class="lp-link" href="#features">Features</a>
             <a class="lp-link" href="#how-to-use">How it Works</a>
             <a class="lp-link" href="#roles">For Who</a>
+            <button id="themeToggleBtn" title="Toggle Theme" class="lp-link"
+                style="border:none; cursor:pointer; background:transparent;">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+            <button id="themeToggleBtn" title="Toggle Theme" class="lp-link"
+                style="border:none; cursor:pointer; background:transparent;"><i class="fas fa-moon"
+                    id="themeIcon"></i></button>
             <a class="btn-nav-login" href="/login">Login</a>
             <a class="btn-nav-cta" href="/register">Sign Up Free</a>
         </div>
@@ -1019,6 +1033,27 @@
             entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
         }, { threshold: 0.12 });
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        /* Toggle Theme */
+        const themeBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+        const rootTheme = document.documentElement;
+
+        if (rootTheme.getAttribute('data-theme') === 'light') {
+            themeIcon.className = 'fas fa-sun';
+        }
+
+        themeBtn.addEventListener('click', () => {
+            if (rootTheme.getAttribute('data-theme') === 'light') {
+                rootTheme.removeAttribute('data-theme');
+                localStorage.setItem('wasla-theme', 'dark');
+                themeIcon.className = 'fas fa-moon';
+            } else {
+                rootTheme.setAttribute('data-theme', 'light');
+                localStorage.setItem('wasla-theme', 'light');
+                themeIcon.className = 'fas fa-sun';
+            }
+        });
     </script>
 </body>
 

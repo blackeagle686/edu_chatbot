@@ -31,6 +31,28 @@
             --ease: 0.22s cubic-bezier(.4, 0, .2, 1);
         }
 
+        [data-theme="light"] {
+            --bg: #F5F5F5;
+            --bg-low: #F0EBE6;
+            --bg-card: #FFFFFF;
+            --bg-input: #FBFBFB;
+            --txt-1: #1A0D0A;
+            --txt-var: #382420;
+            --txt-m: rgba(30, 20, 15, 0.65);
+            --brd: rgba(139, 0, 0, 0.12);
+            --brd-h: rgba(255, 106, 0, .35);
+        }
+
+        [data-theme="light"] body::before {
+            background:
+                radial-gradient(ellipse 70% 55% at 12% 8%, rgba(139, 0, 0, .06) 0%, transparent 65%),
+                radial-gradient(ellipse 55% 45% at 88% 88%, rgba(255, 106, 0, .08) 0%, transparent 60%);
+        }
+
+        [data-theme="light"] nav {
+            background: rgba(255, 255, 255, .82);
+        }
+
         *,
         *::before,
         *::after {
@@ -338,12 +360,26 @@
             }
         }
     </style>
+    <!-- Prevent FOUC Theme Script -->
+    <script>
+        const savedTheme = localStorage.getItem('wasla-theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
 </head>
 
 <body>
     <nav>
         <a class="brand" href="/landing"><i class="fas fa-brain"></i> Wasla Master</a>
-        <a class="nav-pill" href="/register"><i class="fas fa-user-plus"></i> &nbsp;Sign Up Free</a>
+        <div style="display:flex; gap:1rem; align-items:center;">
+            <button id="themeToggleBtn" title="Toggle Theme"
+                style="border:none; cursor:pointer; background:transparent; font-size:1.1rem; color:var(--txt-m); transition:color 0.2s;"
+                onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='var(--txt-m)'">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+            <a class="nav-pill" href="/register"><i class="fas fa-user-plus"></i> &nbsp;Sign Up Free</a>
+        </div>
     </nav>
     <main>
         <div class="auth-card">
@@ -383,6 +419,29 @@
         </div>
     </main>
     <footer>© 2026 Wasla Edu — Crimson Hearth Theme</footer>
+
+    <script>
+        /* Toggle Theme */
+        const themeBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+        const rootTheme = document.documentElement;
+
+        if (rootTheme.getAttribute('data-theme') === 'light') {
+            themeIcon.className = 'fas fa-sun';
+        }
+
+        themeBtn.addEventListener('click', () => {
+            if (rootTheme.getAttribute('data-theme') === 'light') {
+                rootTheme.removeAttribute('data-theme');
+                localStorage.setItem('wasla-theme', 'dark');
+                themeIcon.className = 'fas fa-moon';
+            } else {
+                rootTheme.setAttribute('data-theme', 'light');
+                localStorage.setItem('wasla-theme', 'light');
+                themeIcon.className = 'fas fa-sun';
+            }
+        });
+    </script>
 </body>
 
 </html>

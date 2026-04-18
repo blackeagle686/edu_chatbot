@@ -85,6 +85,13 @@
             margin-bottom: 0;
         }
     </style>
+    <!-- Prevent FOUC Theme Script -->
+    <script>
+        const savedTheme = localStorage.getItem('wasla-theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
 </head>
 
 <body>
@@ -114,6 +121,13 @@
                 Online
                 {% endif %}
             </div>
+
+            <!-- Theme Toggle -->
+            <button id="themeToggleBtn" title="Toggle Theme" class="d-flex align-items-center justify-content-center"
+                style="background:transparent; border:none; color:var(--txt-m); cursor:pointer; font-size:1.05rem; padding:0; outline:none; transition:color 0.2s; margin-left:0.5rem;"
+                onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='var(--txt-m)'">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
 
             <!-- Logout -->
             {% if user %}
@@ -515,6 +529,26 @@
         }
 
         chatForm.addEventListener('submit', handleSubmit);
+        /* ── Toggle Theme ── */
+        const themeBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+        const rootTheme = document.documentElement;
+
+        if (rootTheme.getAttribute('data-theme') === 'light') {
+            themeIcon.className = 'fas fa-sun';
+        }
+
+        themeBtn.addEventListener('click', () => {
+            if (rootTheme.getAttribute('data-theme') === 'light') {
+                rootTheme.removeAttribute('data-theme');
+                localStorage.setItem('wasla-theme', 'dark');
+                themeIcon.className = 'fas fa-moon';
+            } else {
+                rootTheme.setAttribute('data-theme', 'light');
+                localStorage.setItem('wasla-theme', 'light');
+                themeIcon.className = 'fas fa-sun';
+            }
+        });
     </script>
 </body>
 
