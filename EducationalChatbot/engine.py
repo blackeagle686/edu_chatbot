@@ -128,7 +128,7 @@ class IRYMManager:
             if memory_context.startswith("[CACHED_RESPONSE]"):
                 print("[*] Exact semantic cache hit!")
                 cached = memory_context.replace("[CACHED_RESPONSE]", "").strip()
-                return cached, []
+                return cached, [], ""
                 
         tool_reminder = (
             "\n\n[REMINDER: You are the AI Assistant. If the user asked for a file, use the <PDF>, <DOC>, <MD>, or <PLAN> tags now. "
