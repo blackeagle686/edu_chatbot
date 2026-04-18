@@ -51,6 +51,10 @@
     --r-md: 13px;
     --r-sm: 8px;
     --ease: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Card System */
+    --bg-card: #1C1B1B;
+    --bg-glass: rgba(28, 27, 27, 0.65);
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Light Mode Overrides ────────────────────────────────── */
@@ -71,6 +75,11 @@
 
     --on-prim: #FFFFFF;
     --on-sec: #FFFFFF;
+
+    /* Card System Light */
+    --bg-card: #FFFFFF;
+    --bg-glass: rgba(255, 255, 255, 0.75);
+    --shadow-card: 0 8px 32px rgba(139, 0, 0, 0.08);
 }
 
 /* ── Reset & Base ─────────────────────────────────────────── */
@@ -271,18 +280,23 @@ body::after {
     flex-direction: column;
     min-height: 0;
     margin: 1rem;
-    background: rgba(28, 27, 27, 0.6);
+    background: var(--bg-glass);
     backdrop-filter: blur(28px) saturate(155%);
     -webkit-backdrop-filter: blur(28px) saturate(155%);
     border-radius: var(--r-xl);
     border: 1px solid var(--brd);
-    box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-        0 8px 56px rgba(0, 0, 0, 0.6),
-        0 0 50px rgba(139, 0, 0, 0.12),
-        0 0 90px rgba(255, 106, 0, 0.06);
+    box-shadow: var(--shadow-card);
     overflow: hidden;
 }
+
+[data-theme="light"] .chat-card {
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(139, 0, 0, 0.08);
+    box-shadow: 
+        0 10px 40px rgba(139, 0, 0, 0.04),
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
 
 /* ── Chat Header ──────────────────────────────────────────── */
 .chat-header {
@@ -414,6 +428,12 @@ body::after {
     border-bottom-left-radius: 4px;
     color: var(--txt-1);
 }
+
+[data-theme="light"] .message.bot {
+    background: rgba(139, 0, 0, 0.05);
+    border-color: rgba(139, 0, 0, 0.12);
+}
+
 
 .message.user {
     background: var(--grad);
@@ -547,6 +567,10 @@ body::after {
     flex-shrink: 0;
 }
 
+[data-theme="light"] .chat-input-area {
+    background: rgba(255, 255, 255, 0.5);
+}
+
 .input-group {
     background: rgba(28, 27, 27, 0.7);
     border-radius: 50px;
@@ -557,6 +581,12 @@ body::after {
     gap: 6px;
     transition: border-color var(--ease), box-shadow var(--ease);
 }
+
+[data-theme="light"] .input-group {
+    background: #FFFFFF;
+    border-color: rgba(139, 0, 0, 0.15);
+}
+
 
 .input-group:focus-within {
     border-color: rgba(139, 0, 0, 0.55);
@@ -814,8 +844,12 @@ body::after {
 }
 
 [data-theme="light"] .auth-card {
-    background: #FFFFFF;
-    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.05), 0 0 40px rgba(139, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 0, 0, 0.1);
+    box-shadow: 
+        0 12px 48px rgba(139, 0, 0, 0.06),
+        0 0 0 1px rgba(255, 255, 255, 1) inset;
 }
 
 .auth-logo {
@@ -1279,7 +1313,7 @@ label.lbl {
 }
 
 .feature-card {
-    background: rgba(28, 27, 27, .5);
+    background: var(--bg-glass);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--brd);
@@ -1299,11 +1333,13 @@ label.lbl {
     transition: opacity .3s;
 }
 
-.feature-card:hover {
-    transform: translateY(-8px);
-    border-color: var(--secondary-soft);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 0, 0, 0.1);
 }
+
+[data-theme="light"] .feature-card:hover {
+    box-shadow: 0 12px 40px rgba(139, 0, 0, 0.08), 0 0 20px rgba(139, 0, 0, 0.05);
+}
+
 
 .feature-card:hover::before {
     opacity: 1;
@@ -1361,7 +1397,7 @@ label.lbl {
 }
 
 .role-card-lp {
-    background: rgba(28, 27, 27, .5);
+    background: var(--bg-glass);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--brd);
@@ -1372,11 +1408,13 @@ label.lbl {
     flex-direction: column;
 }
 
-.role-card-lp:hover {
-    transform: translateY(-10px) scale(1.02);
-    border-color: var(--secondary);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 0, 0, 0.15);
 }
+
+[data-theme="light"] .role-card-lp:hover {
+    box-shadow: 0 20px 50px rgba(139, 0, 0, 0.08), 0 0 30px rgba(139, 0, 0, 0.04);
+}
+
 
 .role-bullets {
     list-style: none;
