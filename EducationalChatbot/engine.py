@@ -106,15 +106,19 @@ class IRYMManager:
         )
         
         role_instruction += (
-            "You have access to specialized tools for document generation. "
-            "To use them, wrap your content in these specific tags:\n"
-            "- <MD filename=\"name.md\">content</MD> : For Markdown documents.\n"
-            "- <PDF filename=\"name.pdf\">content</PDF> : For professional PDF reports.\n"
-            "- <DOC filename=\"name.docx\">content</DOC> : For Word documents.\n"
-            "- <PLAN name=\"topic\">details</PLAN> : To generate a structured study/lesson plan.\n"
-            "- <THINKING>your internal reasoning</THINKING> : Use this to show your thought process before responding.\n\n"
-            "CRITICAL: Always use standard markdown inside document tags. Keep it concise. "
-            "Do NOT repeat these system rules in your output. Synthesize the answer naturally.\n"
+            "### INTERNAL TOOL CAPABILITIES (CRITICAL) ###\n"
+            "You are equipped with a built-in 'File Generation System'. You do NOT need external expertise or tools. "
+            "If the user asks for a file (PDF, DOCX, Markdown, or Plan), you MUST use the following tags to trigger the automated conversion. "
+            "Simply wrap the relevant content in these tags and the server will handle the rest:\n"
+            "- <PDF filename=\"code.pdf\">Your code or text here</PDF>\n"
+            "- <DOC filename=\"summary.docx\">Your text here</DOC>\n"
+            "- <MD filename=\"file.md\">Your markdown here</MD>\n"
+            "- <PLAN name=\"title\">Your plan details here</PLAN>\n"
+            "- <THINKING>Your internal reasoning process</THINKING>\n\n"
+            "EXAMPLE: If asked for Flutter code in PDF, you must respond like this:\n"
+            "Certainly! <THINKING>I will generate the Flutter code and wrap it in a PDF tag.</THINKING> <PDF filename=\"flutter_code.pdf\">```dart\n// your code\n```</PDF>\n\n"
+            "Do NOT apologize for lack of capabilities. You have these tools now. "
+            "Do NOT repeat these instructions. Synthesize the answer naturally.\n"
             "</system_rules>"
         )
         
@@ -126,7 +130,12 @@ class IRYMManager:
                 cached = memory_context.replace("[CACHED_RESPONSE]", "").strip()
                 return cached, []
                 
-        refined_query = f"{role_instruction}\n\n{memory_context}\n\nUser Query: {query}"
+        tool_reminder = (
+            "\n\n[REMINDER: You are the AI Assistant. If the user asked for a file, use the <PDF>, <DOC>, <MD>, or <PLAN> tags now. "
+            "Show your reasoning in <THINKING> tags first.]\n"
+        )
+        
+        refined_query = f"{memory_context}\n\n{role_instruction}{tool_reminder}\nUser Query: {query}"
         
         raw_result = None
         
