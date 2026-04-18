@@ -136,13 +136,14 @@ body::after {
 }
 
 @keyframes floatOrb {
-    from {
-        transform: translate(0, 0) scale(1);
-    }
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(-80px, 120px) scale(1.3); }
+}
 
-    to {
-        transform: translate(-55px, 80px) scale(1.2);
-    }
+@keyframes pulseGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 /* ── Navbar ───────────────────────────────────────────────── */
@@ -150,12 +151,13 @@ body::after {
     position: relative;
     z-index: 20;
     flex-shrink: 0;
-    background: rgba(14, 14, 14, 0.78);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(14, 14, 14, 0.65);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
     border-bottom: 1px solid var(--brd);
-    padding: 0.7rem 1.5rem;
-    box-shadow: 0 2px 28px rgba(0, 0, 0, 0.55);
+    padding: 0.8rem 2rem;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    transition: background var(--ease), border-color var(--ease);
 }
 
 [data-theme="light"] .navbar {
@@ -1110,7 +1112,37 @@ label.lbl {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 8rem 1.5rem 4rem;
+    padding: 10rem 1.5rem 6rem;
+    overflow: hidden;
+}
+
+.hero-blob {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: -1;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.blob-1 {
+    background: var(--primary);
+    top: -100px;
+    left: -100px;
+    animation: floatOrb 15s infinite alternate;
+}
+
+.blob-2 {
+    background: var(--secondary);
+    bottom: -100px;
+    right: -100px;
+    animation: floatOrb 12s infinite alternate-reverse;
+}
+
+[data-theme="light"] .hero-blob {
+    opacity: 0.08;
 }
 
 .hero-badge {
@@ -1162,34 +1194,50 @@ label.lbl {
 
 .btn-hero-primary {
     background: var(--grad);
+    background-size: 200% 200%;
+    animation: pulseGradient 6s ease infinite;
     border: none;
     border-radius: 14px;
-    padding: 0.85rem 2.2rem;
-    font-size: 1rem;
+    padding: 0.95rem 2.4rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: #fff;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 0.55rem;
-    box-shadow: 0 4px 24px rgba(139, 0, 0, .38);
-    transition: all .22s;
+    gap: 0.65rem;
+    box-shadow: 0 8px 32px rgba(139, 0, 0, .45);
+    transition: transform .22s, box-shadow .22s;
+}
+
+.btn-hero-primary:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 42px rgba(139, 0, 0, .55);
+    color: #fff;
 }
 
 .btn-hero-secondary {
-    background: rgba(255, 255, 255, .04);
+    background: rgba(255, 255, 255, .05);
     border: 1px solid var(--brd);
     border-radius: 14px;
-    padding: 0.85rem 2.2rem;
-    font-size: 1rem;
+    padding: 0.95rem 2.4rem;
+    font-size: 1.05rem;
     font-weight: 600;
     color: var(--txt-1);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 0.55rem;
-    backdrop-filter: blur(10px);
+    gap: 0.65rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     transition: all .22s;
+}
+
+.btn-hero-secondary:hover {
+    background: rgba(255, 255, 255, .1);
+    border-color: var(--brd-full);
+    transform: translateY(-2px);
+    color: var(--txt-1);
 }
 
 .hero-stats {
@@ -1224,11 +1272,34 @@ label.lbl {
 }
 
 .feature-card {
-    background: rgba(28, 27, 27, .7);
+    background: rgba(28, 27, 27, .5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--brd);
-    border-radius: 18px;
-    padding: 1.75rem;
-    transition: transform .25s, box-shadow .25s, border-color .25s;
+    border-radius: 22px;
+    padding: 2.25rem;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 100%;
+    background: linear-gradient(135deg, rgba(255, 106, 0, 0.1), transparent);
+    opacity: 0;
+    transition: opacity .3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--secondary-soft);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 0, 0, 0.1);
+}
+
+.feature-card:hover::before {
+    opacity: 1;
 }
 
 .feature-icon {
@@ -1283,11 +1354,43 @@ label.lbl {
 }
 
 .role-card-lp {
-    background: rgba(28, 27, 27, .7);
+    background: rgba(28, 27, 27, .5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--brd);
-    border-radius: 22px;
-    padding: 2.25rem;
-    transition: transform .25s, box-shadow .25s;
+    border-radius: 28px;
+    padding: 3rem 2.5rem;
+    transition: all .35s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.role-card-lp:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: var(--secondary);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 0, 0, 0.15);
+}
+
+.role-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.role-bullets li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--txt-m);
+}
+
+.role-bullets li i {
+    color: var(--secondary);
+    font-size: 0.85rem;
 }
 
 .role-icon-big {
@@ -1298,12 +1401,13 @@ label.lbl {
 }
 
 .cta-banner {
-    background: linear-gradient(135deg, rgba(139, 0, 0, .12), rgba(255, 106, 0, .07));
-    border: 1px solid var(--brd);
-    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(139, 0, 0, .18), rgba(255, 106, 0, .08));
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--brd-s);
+    border-radius: 32px;
     text-align: center;
-    padding: 4rem 2rem;
-    box-shadow: 0 0 60px rgba(139, 0, 0, .12);
+    padding: 5rem 2rem;
+    box-shadow: 0 0 80px rgba(139, 0, 0, .15), 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
 .reveal {

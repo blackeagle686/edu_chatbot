@@ -39,8 +39,11 @@
 
     <!-- ── Hero ─────────────────────────────────────────────────────────── -->
     <section class="hero" id="home">
-        <div class="hero-badge">
-            <span></span> AI-Powered Education Platform
+        <div class="hero-blob blob-1"></div>
+        <div class="hero-blob blob-2"></div>
+        
+        <div class="hero-badge reveal">
+            <span class="status-dot"></span> AI-Powered Education Platform
         </div>
         <h1 class="hero-title">
             Learn Smarter with<br>
@@ -82,30 +85,28 @@
         </div>
 
         <!-- chat preview card -->
-        <div class="hero-visual" style="width: 100%; max-width: 680px;">
-            <div class="chat-preview">
-                <div class="chat-preview-header">
-                    <div class="cp-avatar"><i class="fas fa-brain"></i></div>
-                    <div>
-                        <div class="cp-title">Wasla Edu Assistant</div>
-                        <div class="cp-sub">Vision-enabled · RAG-powered · Semantic Memory</div>
+        <div class="hero-visual reveal" style="width: 100%; max-width: 720px; margin-top: 4rem;">
+            <div class="chat-preview" style="background: rgba(28, 27, 27, 0.6); backdrop-filter: blur(30px); border: 1px solid var(--brd); border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                <div class="chat-preview-header" style="border-bottom: 1px solid var(--brd); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem;">
+                    <div class="cp-avatar" style="width: 40px; height: 40px; background: var(--grad); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff;"><i class="fas fa-brain"></i></div>
+                    <div style="text-align: left;">
+                        <div class="cp-title" style="font-weight: 700; font-size: 0.95rem; color: var(--txt-1);">Wasla Edu Assistant</div>
+                        <div class="cp-sub" style="font-size: 0.75rem; color: var(--txt-m);">Vision-enabled · RAG-powered</div>
                     </div>
-                    <div class="cp-dots">
-                        <span></span><span></span><span></span>
+                    <div class="cp-dots" style="margin-left: auto; display: flex; gap: 4px;">
+                        <span style="width: 8px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 50%;"></span>
+                        <span style="width: 8px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 50%;"></span>
+                        <span style="width: 8px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 50%;"></span>
                     </div>
                 </div>
-                <div class="cp-messages">
-                    <div class="cp-bubble user">Can you explain the main benefits of cloud computing?</div>
-                    <div class="cp-bubble bot">
-                        ☁️ Cloud computing offers <strong>scalability</strong>, <strong>cost efficiency</strong>, and
-                        <strong>global accessibility</strong>. You only pay for what you use, and you can scale up or
-                        down instantly — no need for expensive on-premises hardware.
+                <div class="cp-messages" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; text-align: left;">
+                    <div class="cp-bubble user" style="align-self: flex-end; background: var(--grad); padding: 0.75rem 1.25rem; border-radius: 18px 18px 2px 18px; color: #fff; font-size: 0.9rem; max-width: 80%;">Can you explain the main benefits of cloud computing?</div>
+                    <div class="cp-bubble bot" style="align-self: flex-start; background: rgba(255,255,255,0.05); border: 1px solid var(--brd); padding: 0.75rem 1.25rem; border-radius: 18px 18px 18px 2px; color: var(--txt-1); font-size: 0.9rem; max-width: 80%;">
+                        ☁️ Cloud computing offers <strong>scalability</strong>, <strong>cost efficiency</strong>, and <strong>global accessibility</strong>. You only pay for what you use.
                     </div>
-                    <div class="cp-bubble user">Create a study plan for this topic and let me download it.</div>
-                    <div class="cp-bubble bot">
-                        📄 <strong>Generated:</strong> <span
-                            style="color:#ffb800; text-decoration:underline">cloud_computing_study_plan.md</span> —
-                        ingested into your session RAG automatically!
+                    <div class="cp-bubble user" style="align-self: flex-end; background: var(--grad); padding: 0.75rem 1.25rem; border-radius: 18px 18px 2px 18px; color: #fff; font-size: 0.9rem; max-width: 80%;">Create a study plan for this topic.</div>
+                    <div class="cp-bubble bot" style="align-self: flex-start; background: rgba(255,255,255,0.05); border: 1px solid var(--brd); padding: 0.75rem 1.25rem; border-radius: 18px 18px 18px 2px; color: var(--txt-1); font-size: 0.9rem; max-width: 80%;">
+                        📄 <strong>Generated:</strong> <span style="color:var(--tertiary); text-decoration:underline">cloud_computing_plan.md</span> — ingested into your RAG!
                     </div>
                 </div>
             </div>
