@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IRYM Educational Chatbot</title>
+    <title>Wasla Edu Assistant</title>
     <meta name="description"
-        content="IRYM Educational Assistant – AI-powered learning with vision and RAG capabilities.">
+        content="Wasla Educational Assistant – AI-powered learning with vision and RAG capabilities.">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -91,22 +91,35 @@
 
     <!-- ───────────── Navbar ───────────── -->
     <nav class="navbar">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="/">
             <i class="fas fa-brain"></i>
-            IRYM Master
+            Wasla Master
         </a>
         <div class="d-flex align-items-center gap-3">
             <div class="form-check form-switch text-light mb-0" style="margin-right: 15px;">
-                <input class="form-check-input" type="checkbox" id="role-switch" style="cursor: pointer;">
-                <label class="form-check-label font-weight-bold" for="role-switch" id="role-label"
-                    style="opacity: 0.9; cursor: pointer; font-size: 0.9em; padding-top: 2px;">Learner Mode</label>
+                <input class="form-check-input" type="checkbox" id="role-switch" style="cursor: pointer;" {% if user and
+                    user.role=='helper' %}checked{% endif %}>
+                <label class="form-check-label" for="role-switch" id="role-label"
+                    style="cursor: pointer; padding-top: 2px;">
+                    {{ 'Helper Mode' if user and user.role == 'helper' else 'Learner Mode' }}
+                </label>
             </div>
-
             <span class="navbar-tagline d-none d-sm-block">Empowering Learning with AI</span>
             <div class="status-pill">
                 <span class="status-dot"></span>
+                {% if user %}
+                <i class="fas fa-user me-1"></i>{{ user.username }}
+                {% else %}
                 Online
+                {% endif %}
             </div>
+            {% if user %}
+            <a href="/logout" title="Logout"
+                style="color:rgba(255,235,200,0.55); font-size:0.9rem; text-decoration:none; transition: color 0.2s;"
+                onmouseover="this.style.color='#ff8c00'" onmouseout="this.style.color='rgba(255,235,200,0.55)'">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+            {% endif %}
         </div>
     </nav>
 
@@ -120,7 +133,8 @@
                         <i class="fas fa-robot"></i>
                     </div>
                     <div class="chat-header-info">
-                        <h6>IRYM Educational Assistant</h6>
+                        <h6>Wasla Edu Assistant</h6>
+                        <small>Ask me anything · Vision-enabled · RAG-powered · Semantic Memory</small>
                         <small>Ask me anything · Vision-enabled · RAG-powered</small>
                     </div>
                 </div>
@@ -135,7 +149,7 @@
                         <div class="msg-avatar bot-av"><i class="fas fa-robot"></i></div>
                         <div>
                             <div class="message bot welcome">
-                                👋 Hello! I'm your <strong>IRYM Educational Assistant</strong>.<br>
+                                👋 Hello! I'm your <strong>Wasla Edu Assistant</strong>.<br>
                                 Ask me anything about your courses, or upload an image for AI-powered visual analysis!
                                 <span class="msg-time" id="welcome-time"></span>
                             </div>

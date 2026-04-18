@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — Wasla Edu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .auth-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            padding: 2rem;
+            position: relative;
+            z-index: 5;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 460px;
+            background: rgba(255, 255, 255, 0.038);
+            border: 1px solid rgba(255, 200, 100, 0.12);
+            border-radius: 24px;
+            padding: 2.5rem;
+            backdrop-filter: blur(28px) saturate(150%);
+            -webkit-backdrop-filter: blur(28px) saturate(150%);
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.025) inset,
+                0 8px 56px rgba(0, 0, 0, 0.55),
+                0 0 48px rgba(255, 106, 0, 0.22),
+                0 0 80px rgba(255, 184, 0, 0.10);
+        }
+
+        .auth-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            margin-bottom: 2rem;
+        }
+
+        .auth-logo-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6a00, #ffb800);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #1a0a00;
+            box-shadow: 0 0 22px rgba(255, 106, 0, 0.4);
+        }
+
+        .auth-logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ff6a00, #ffb800);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #fff3e6;
+            margin-bottom: 0.3rem;
+        }
+
+        .auth-subtitle {
+            font-size: 0.85rem;
+            color: rgba(255, 235, 200, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        .auth-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255, 235, 200, 0.7);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.03em;
+        }
+
+        .auth-input {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 200, 100, 0.15) !important;
+            border-radius: 12px !important;
+            color: #fff3e6 !important;
+            padding: 0.75rem 1rem !important;
+            font-size: 0.93rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .auth-input:focus {
+            border-color: rgba(255, 140, 0, 0.55) !important;
+            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.12) !important;
+            background: rgba(255, 255, 255, 0.07) !important;
+        }
+
+        .auth-input::placeholder {
+            color: rgba(255, 235, 200, 0.32) !important;
+        }
+
+        .auth-btn {
+            background: linear-gradient(135deg, #ff6a00, #ffb800);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a0a00;
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 18px rgba(255, 106, 0, 0.35);
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 26px rgba(255, 106, 0, 0.5);
+        }
+
+        .auth-btn:active {
+            transform: scale(0.98);
+        }
+
+        .auth-separator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+            color: rgba(255, 235, 200, 0.25);
+            font-size: 0.78rem;
+        }
+
+        .auth-separator::before,
+        .auth-separator::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 200, 100, 0.12);
+        }
+
+        .auth-link {
+            color: #ff8c00;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-link:hover {
+            color: #ffb800;
+            text-decoration: underline;
+        }
+
+        .auth-role-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .role-card {
+            flex: 1;
+            border: 1px solid rgba(255, 200, 100, 0.15);
+            border-radius: 12px;
+            padding: 0.85rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.2s;
+        }
+
+        .role-card input[type="radio"] {
+            display: none;
+        }
+
+        .role-card:has(input:checked) {
+            border-color: #ff8c00;
+            background: rgba(255, 140, 0, 0.12);
+            box-shadow: 0 0 14px rgba(255, 140, 0, 0.18);
+        }
+
+        .role-card i {
+            display: block;
+            font-size: 1.5rem;
+            color: #ff8c00;
+            margin-bottom: 0.4rem;
+        }
+
+        .role-card .role-name {
+            font-size: 0.85rem;
+            color: #fff3e6;
+            font-weight: 600;
+        }
+
+        .role-card .role-desc {
+            font-size: 0.72rem;
+            color: rgba(255, 235, 200, 0.45);
+            margin-top: 0.15rem;
+        }
+
+        .alert-auth {
+            background: rgba(255, 60, 60, 0.1);
+            border: 1px solid rgba(255, 60, 60, 0.25);
+            color: #ffaaaa;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            padding: 0.65rem 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .alert-success-auth {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #86efac;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            padding: 0.65rem 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-brain"></i>
+            Wasla Master
+        </a>
+        <span class="navbar-tagline d-none d-sm-block">Empowering Learning with AI</span>
+    </nav>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="auth-logo-icon"><i class="fas fa-brain"></i></div>
+                <span class="auth-logo-text">Wasla Edu</span>
+            </div>
+            <h2 class="auth-title">Create your account ✨</h2>
+            <p class="auth-subtitle">Join Wasla and start your AI-powered learning journey today.</p>
+
+            {% if error %}
+            <div class="alert-auth">
+                <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="/register">
+                <div class="mb-3">
+                    <label class="auth-label">Username</label>
+                    <input type="text" name="username" class="form-control auth-input" placeholder="Pick a username"
+                        required autofocus minlength="3">
+                </div>
+                <div class="mb-3">
+                    <label class="auth-label">Password</label>
+                    <input type="password" name="password" class="form-control auth-input"
+                        placeholder="Create a password (min 6 chars)" required minlength="6">
+                </div>
+                <div class="mb-4">
+                    <label class="auth-label d-block mb-2">I am a…</label>
+                    <div class="auth-role-group">
+                        <label class="role-card">
+                            <input type="radio" name="role" value="user" checked>
+                            <i class="fas fa-graduation-cap"></i>
+                            <div class="role-name">Learner</div>
+                            <div class="role-desc">Student seeking help</div>
+                        </label>
+                        <label class="role-card">
+                            <input type="radio" name="role" value="helper">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <div class="role-name">Helper</div>
+                            <div class="role-desc">Teacher / Tutor</div>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="auth-btn">
+                    <i class="fas fa-user-plus me-2"></i>Create Account
+                </button>
+            </form>
+
+            <div class="auth-separator">OR</div>
+
+            <p style="text-align:center; font-size:0.87rem; color:rgba(255,235,200,0.5);">
+                Already have an account?
+                <a href="/login" class="auth-link">Sign in</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
