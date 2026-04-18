@@ -5,266 +5,412 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — Wasla Edu</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="description" content="Sign in to Wasla Edu — AI-powered educational assistant.">
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/style.css">
     <style>
-        .auth-wrapper {
+        :root {
+            --red: #8B0000;
+            --red-h: #a80000;
+            --orange: #FF6A00;
+            --amber: #FFA94D;
+            --bg: #121212;
+            --bg-card: #1a1a1a;
+            --bg-input: #222222;
+            --border: rgba(255, 106, 0, .18);
+            --border-h: rgba(255, 106, 0, .45);
+            --txt-1: #F5F0EA;
+            --txt-m: rgba(245, 235, 220, .5);
+            --ease: 0.22s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--txt-1);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /*── Animated BG ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 70% 55% at 15% 10%, rgba(139, 0, 0, .22) 0%, transparent 65%),
+                radial-gradient(ellipse 55% 45% at 88% 88%, rgba(255, 106, 0, .16) 0%, transparent 60%),
+                radial-gradient(ellipse 45% 40% at 50% 50%, rgba(255, 169, 77, .06) 0%, transparent 55%);
+        }
+
+        /* ── Navbar ── */
+        nav {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: rgba(18, 18, 18, .8);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--orange), var(--amber));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+            text-decoration: none;
+        }
+
+        .brand i {
+            -webkit-text-fill-color: initial;
+            color: var(--orange);
+            filter: drop-shadow(0 0 7px var(--orange));
+        }
+
+        .nav-link-ghost {
+            font-size: .85rem;
+            font-weight: 500;
+            color: var(--txt-m);
+            text-decoration: none;
+            padding: .4rem .9rem;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            transition: all var(--ease);
+        }
+
+        .nav-link-ghost:hover {
+            color: var(--amber);
+            border-color: var(--border-h);
+            background: rgba(255, 106, 0, .07);
+        }
+
+        /* ── Main wrapper ── */
+        main {
+            position: relative;
+            z-index: 5;
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex: 1;
-            padding: 2rem;
-            position: relative;
-            z-index: 5;
+            padding: 2.5rem 1.25rem;
         }
 
+        /* ── Auth Card ── */
         .auth-card {
             width: 100%;
             max-width: 440px;
-            background: rgba(255, 255, 255, 0.038);
-            border: 1px solid rgba(255, 200, 100, 0.12);
-            border-radius: 24px;
-            padding: 2.5rem;
-            backdrop-filter: blur(28px) saturate(150%);
-            -webkit-backdrop-filter: blur(28px) saturate(150%);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 2.75rem 2.25rem;
             box-shadow:
-                0 0 0 1px rgba(255, 255, 255, 0.025) inset,
-                0 8px 56px rgba(0, 0, 0, 0.55),
-                0 0 48px rgba(255, 106, 0, 0.22),
-                0 0 80px rgba(255, 184, 0, 0.10);
+                0 0 0 1px rgba(255, 255, 255, .03) inset,
+                0 8px 48px rgba(0, 0, 0, .55),
+                0 0 60px rgba(139, 0, 0, .12),
+                0 0 100px rgba(255, 106, 0, .07);
         }
 
+        /* ── Logo ── */
         .auth-logo {
             display: flex;
             align-items: center;
-            gap: 0.7rem;
+            gap: .7rem;
             margin-bottom: 2rem;
         }
 
         .auth-logo-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ff6a00, #ffb800);
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--red), var(--orange));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
-            color: #1a0a00;
-            box-shadow: 0 0 22px rgba(255, 106, 0, 0.4);
+            font-size: 1.25rem;
+            color: #fff;
+            box-shadow: 0 4px 18px rgba(139, 0, 0, .35);
         }
 
         .auth-logo-text {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.35rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, #ff6a00, #ffb800);
+            font-size: 1.25rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--orange), var(--amber));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
+        /* ── Headings ── */
         .auth-title {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.65rem;
-            font-weight: 700;
-            color: #fff3e6;
-            margin-bottom: 0.3rem;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--txt-1);
+            margin-bottom: .35rem;
         }
 
-        .auth-subtitle {
-            font-size: 0.85rem;
-            color: rgba(255, 235, 200, 0.5);
+        .auth-sub {
+            font-size: .85rem;
+            color: var(--txt-m);
             margin-bottom: 2rem;
+            line-height: 1.6;
         }
 
-        .auth-label {
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: rgba(255, 235, 200, 0.7);
-            margin-bottom: 0.5rem;
-            letter-spacing: 0.03em;
-        }
-
-        .auth-input {
-            background: rgba(255, 255, 255, 0.05) !important;
-            border: 1px solid rgba(255, 200, 100, 0.15) !important;
-            border-radius: 12px !important;
-            color: #fff3e6 !important;
-            padding: 0.75rem 1rem !important;
-            font-size: 0.93rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .auth-input:focus {
-            border-color: rgba(255, 140, 0, 0.55) !important;
-            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.12) !important;
-            background: rgba(255, 255, 255, 0.07) !important;
-        }
-
-        .auth-input::placeholder {
-            color: rgba(255, 235, 200, 0.32) !important;
-        }
-
-        .auth-btn {
-            background: linear-gradient(135deg, #ff6a00, #ffb800);
-            border: none;
-            border-radius: 12px;
-            padding: 0.75rem;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #1a0a00;
-            width: 100%;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 18px rgba(255, 106, 0, 0.35);
-        }
-
-        .auth-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 26px rgba(255, 106, 0, 0.5);
-        }
-
-        .auth-btn:active {
-            transform: scale(0.98);
-        }
-
-        .auth-separator {
+        /* ── Error alert ── */
+        .auth-error {
+            background: rgba(139, 0, 0, .15);
+            border: 1px solid rgba(139, 0, 0, .35);
+            color: #ffaaaa;
+            border-radius: 10px;
+            font-size: .84rem;
+            padding: .65rem 1rem;
+            margin-bottom: 1.25rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            margin: 1.5rem 0;
-            color: rgba(255, 235, 200, 0.25);
-            font-size: 0.78rem;
+            gap: .6rem;
         }
 
-        .auth-separator::before,
-        .auth-separator::after {
+        /* ── Form ── */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label.field-label {
+            display: block;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--txt-m);
+            letter-spacing: .04em;
+            margin-bottom: .5rem;
+            text-transform: uppercase;
+        }
+
+        .field-wrap {
+            position: relative;
+        }
+
+        .field-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--txt-m);
+            font-size: .88rem;
+            pointer-events: none;
+            transition: color var(--ease);
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: .78rem 1rem .78rem 2.6rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--txt-1);
+            font-size: .92rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color var(--ease), box-shadow var(--ease);
+        }
+
+        input:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 0 3px rgba(255, 106, 0, .14);
+        }
+
+        input:focus+.field-icon-after {
+            color: var(--orange);
+        }
+
+        .field-wrap:focus-within .field-icon {
+            color: var(--orange);
+        }
+
+        input::placeholder {
+            color: rgba(245, 235, 220, .25);
+        }
+
+        /* ── Submit ── */
+        .btn-submit {
+            width: 100%;
+            padding: .82rem;
+            background: linear-gradient(135deg, var(--red), var(--orange));
+            border: none;
+            border-radius: 12px;
+            font-size: .95rem;
+            font-weight: 700;
+            font-family: inherit;
+            color: #fff;
+            cursor: pointer;
+            letter-spacing: .01em;
+            box-shadow: 0 4px 20px rgba(139, 0, 0, .35);
+            transition: transform var(--ease), box-shadow var(--ease);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .6rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 28px rgba(255, 106, 0, .4);
+        }
+
+        .btn-submit:active {
+            transform: scale(.98);
+        }
+
+        /* ── Divider ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin: 1.5rem 0;
+            color: var(--txt-m);
+            font-size: .76rem;
+        }
+
+        .divider::before,
+        .divider::after {
             content: '';
             flex: 1;
             height: 1px;
-            background: rgba(255, 200, 100, 0.12);
+            background: var(--border);
         }
 
-        .auth-link {
-            color: #ff8c00;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .auth-link:hover {
-            color: #ffb800;
-            text-decoration: underline;
-        }
-
-        .auth-role-group {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .role-card {
-            flex: 1;
-            border: 1px solid rgba(255, 200, 100, 0.15);
-            border-radius: 12px;
-            padding: 0.75rem 0.5rem;
+        /* ── Link ── */
+        .auth-footer {
             text-align: center;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.03);
-            transition: all 0.2s;
+            font-size: .86rem;
+            color: var(--txt-m);
         }
 
-        .role-card input {
-            display: none;
+        .auth-footer a {
+            color: var(--amber);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color var(--ease);
         }
 
-        .role-card.selected,
-        .role-card:has(input:checked) {
-            border-color: #ff8c00;
-            background: rgba(255, 140, 0, 0.12);
-            box-shadow: 0 0 12px rgba(255, 140, 0, 0.15);
+        .auth-footer a:hover {
+            color: var(--orange);
         }
 
-        .role-card i {
-            display: block;
-            font-size: 1.4rem;
-            color: #ff8c00;
-            margin-bottom: 0.35rem;
+        /* ── Footer bar ── */
+        footer {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 1.1rem;
+            font-size: .72rem;
+            color: var(--txt-m);
+            border-top: 1px solid var(--border);
         }
 
-        .role-card span {
-            font-size: 0.8rem;
-            color: rgba(255, 235, 200, 0.75);
-            font-weight: 500;
-        }
+        /* ── Responsive ── */
+        @media (max-width: 500px) {
+            nav {
+                padding: .8rem 1rem;
+            }
 
-        .alert-auth {
-            background: rgba(255, 60, 60, 0.1);
-            border: 1px solid rgba(255, 60, 60, 0.25);
-            color: #ffaaaa;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            padding: 0.65rem 1rem;
-            margin-bottom: 1.25rem;
+            .auth-card {
+                padding: 2rem 1.25rem;
+                border-radius: 18px;
+            }
+
+            .auth-title {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-brain"></i>
-            Wasla Master
+
+    <nav>
+        <a class="brand" href="/landing">
+            <i class="fas fa-brain"></i> Wasla Master
         </a>
-        <span class="navbar-tagline d-none d-sm-block">Empowering Learning with AI</span>
+        <a class="nav-link-ghost" href="/register"><i class="fas fa-user-plus me-1"></i>Sign Up Free</a>
     </nav>
 
-    <div class="auth-wrapper">
+    <main>
         <div class="auth-card">
             <div class="auth-logo">
                 <div class="auth-logo-icon"><i class="fas fa-brain"></i></div>
                 <span class="auth-logo-text">Wasla Edu</span>
             </div>
-            <h2 class="auth-title">Welcome back 👋</h2>
-            <p class="auth-subtitle">Sign in to continue your learning journey.</p>
+
+            <h1 class="auth-title">Welcome back 👋</h1>
+            <p class="auth-sub">Sign in to continue your learning journey with Wasla.</p>
 
             {% if error %}
-            <div class="alert-auth">
-                <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+            <div class="auth-error">
+                <i class="fas fa-exclamation-circle"></i> {{ error }}
             </div>
             {% endif %}
 
             <form method="post" action="/login">
-                <div class="mb-3">
-                    <label class="auth-label">Username</label>
-                    <input type="text" name="username" class="form-control auth-input" placeholder="Enter your username"
-                        required autofocus>
+                <div class="form-group">
+                    <label class="field-label" for="username">Username</label>
+                    <div class="field-wrap">
+                        <i class="fas fa-user field-icon"></i>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required
+                            autofocus autocomplete="username">
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label class="auth-label">Password</label>
-                    <input type="password" name="password" class="form-control auth-input"
-                        placeholder="Enter your password" required>
+                <div class="form-group">
+                    <label class="field-label" for="password">Password</label>
+                    <div class="field-wrap">
+                        <i class="fas fa-lock field-icon"></i>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required
+                            autocomplete="current-password">
+                    </div>
                 </div>
-                <button type="submit" class="auth-btn">
-                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
                 </button>
             </form>
 
-            <div class="auth-separator">OR</div>
+            <div class="divider">OR</div>
 
-            <p style="text-align:center; font-size:0.87rem; color:rgba(255,235,200,0.5);">
-                Don't have an account?
-                <a href="/register" class="auth-link">Create one free</a>
-            </p>
+            <div class="auth-footer">
+                Don't have an account? <a href="/register">Create one free →</a>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <footer>© 2026 Wasla Edu — AI-Powered Learning</footer>
+
 </body>
 
 </html>
