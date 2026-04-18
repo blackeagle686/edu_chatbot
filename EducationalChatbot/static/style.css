@@ -1,35 +1,59 @@
 /* ============================================================
-   IRYM Educational Chatbot — Autumn Gradient Premium UI
+   Wasla Edu — Crimson Hearth Design System
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700;800&display=swap');
 
-/* ── Design Tokens ───────────────────────────────────────── */
+/* ── Token System ─────────────────────────────────────────── */
 :root {
-    --ember: #ff6a00;
-    --amber: #ff8c00;
-    --gold: #ffb800;
-    --rust: #ea580c;
-    --deep-rust: #c94400;
-    --bg-1: #09050a;
-    --bg-2: #110a04;
-    --bg-3: #1a0f06;
-    --glass: rgba(255, 255, 255, 0.04);
-    --glass-h: rgba(255, 255, 255, 0.08);
-    --glass-b: rgba(255, 200, 100, 0.10);
-    --glass-bs: rgba(255, 200, 100, 0.20);
-    --txt-1: #fff3e6;
-    --txt-m: rgba(255, 235, 200, 0.48);
-    --glow-a: rgba(255, 106, 0, 0.25);
-    --glow-b: rgba(255, 184, 0, 0.15);
-    --r-xl: 28px;
+    /* Core Autumn */
+    --primary: #8B0000;
+    --primary-soft: #FFB4A8;
+    --secondary: #FF6A00;
+    --secondary-soft: #FFB694;
+    --tertiary: #FFB871;
+    --tertiary-cont: #633800;
+    --inv-primary: #B52619;
+
+    /* Backgrounds */
+    --bg-0: #0E0E0E;
+    --bg: #131313;
+    --bg-low: #1C1B1B;
+    --bg-high: #2A2A2A;
+    --bg-bright: #393939;
+
+    /* Text */
+    --txt-1: #E5E2E1;
+    --txt-var: #E3BEB8;
+    --txt-m: rgba(229, 226, 225, 0.52);
+    --on-prim: #690000;
+    --on-sec: #571F00;
+
+    /* Accents */
+    --gold: #FFDCBE;
+
+    /* Status */
+    --err: #93000A;
+    --err-l: #FFB4AB;
+
+    /* Borders */
+    --brd: rgba(170, 137, 132, 0.22);
+    --brd-s: #5A403C;
+    --brd-full: #AA8984;
+
+    /* Gradient */
+    --grad: linear-gradient(135deg, #8B0000, #FF6A00);
+    --grad-w: linear-gradient(135deg, #FF6A00, #FFB871);
+
+    /* Radii & Transitions */
+    --r-xl: 26px;
     --r-lg: 18px;
-    --r-md: 14px;
+    --r-md: 13px;
     --r-sm: 8px;
     --ease: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Reset & Base ────────────────────────────────────────── */
+/* ── Reset & Base ─────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -38,13 +62,17 @@
     padding: 0;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 html,
 body {
     height: 100%;
 }
 
 body {
-    background: var(--bg-1);
+    background: var(--bg);
     color: var(--txt-1);
     font-family: 'Inter', sans-serif;
     overflow: hidden;
@@ -52,33 +80,32 @@ body {
     flex-direction: column;
 }
 
-/* Animated background mesh */
+/* Ambient background radials */
 body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background:
-        radial-gradient(ellipse 80% 55% at 15% 10%, rgba(255, 106, 0, 0.20) 0%, transparent 65%),
-        radial-gradient(ellipse 60% 50% at 85% 85%, rgba(255, 184, 0, 0.13) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 45% at 50% 50%, rgba(234, 88, 12, 0.09) 0%, transparent 55%),
-        linear-gradient(165deg, var(--bg-1) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
     z-index: 0;
     pointer-events: none;
+    background:
+        radial-gradient(ellipse 75% 55% at 12% 8%, rgba(139, 0, 0, 0.22) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 45% at 88% 88%, rgba(255, 106, 0, 0.16) 0%, transparent 60%),
+        radial-gradient(ellipse 45% 40% at 50% 50%, rgba(255, 184, 113, 0.05) 0%, transparent 55%);
 }
 
-/* Floating ember orb */
+/* Floating orb */
 body::after {
     content: '';
     position: fixed;
-    width: 600px;
-    height: 600px;
+    width: 550px;
+    height: 550px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 106, 0, 0.10) 0%, transparent 70%);
-    top: -200px;
-    right: -150px;
-    animation: floatOrb 14s ease-in-out infinite alternate;
     z-index: 0;
     pointer-events: none;
+    background: radial-gradient(circle, rgba(139, 0, 0, 0.09) 0%, transparent 70%);
+    top: -180px;
+    right: -130px;
+    animation: floatOrb 14s ease-in-out infinite alternate;
 }
 
 @keyframes floatOrb {
@@ -87,29 +114,28 @@ body::after {
     }
 
     to {
-        transform: translate(-50px, 80px) scale(1.2);
+        transform: translate(-55px, 80px) scale(1.2);
     }
 }
 
-/* ── Navbar ──────────────────────────────────────────────── */
+/* ── Navbar ───────────────────────────────────────────────── */
 .navbar {
     position: relative;
     z-index: 20;
-    background: rgba(9, 5, 10, 0.75);
+    flex-shrink: 0;
+    background: rgba(14, 14, 14, 0.78);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-bottom: 1px solid var(--glass-b);
+    border-bottom: 1px solid var(--brd);
     padding: 0.7rem 1.5rem;
-    box-shadow: 0 2px 28px rgba(0, 0, 0, 0.5);
-    flex-shrink: 0;
+    box-shadow: 0 2px 28px rgba(0, 0, 0, 0.55);
 }
 
 .navbar-brand {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    background: linear-gradient(90deg, var(--ember), var(--gold));
+    font-weight: 800;
+    background: var(--grad-w);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -121,8 +147,8 @@ body::after {
 
 .navbar-brand i {
     -webkit-text-fill-color: initial;
-    color: var(--amber);
-    filter: drop-shadow(0 0 8px var(--ember));
+    color: var(--secondary);
+    filter: drop-shadow(0 0 8px var(--primary));
 }
 
 .navbar-tagline {
@@ -138,12 +164,12 @@ body::after {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: rgba(255, 140, 0, 0.08);
-    border: 1px solid rgba(255, 140, 0, 0.22);
+    background: rgba(139, 0, 0, 0.1);
+    border: 1px solid rgba(139, 0, 0, 0.28);
     border-radius: 20px;
     padding: 4px 12px;
     font-size: 0.72rem;
-    color: var(--amber);
+    color: var(--tertiary);
     font-weight: 500;
 }
 
@@ -170,64 +196,61 @@ body::after {
     }
 }
 
-/* Role switch label */
+/* Toggle */
 .form-check-label {
-    color: var(--txt-1) !important;
+    color: var(--txt-var) !important;
     font-size: 0.85rem !important;
 }
 
 .form-check-input:checked {
-    background-color: var(--ember) !important;
-    border-color: var(--amber) !important;
+    background-color: var(--secondary) !important;
+    border-color: var(--tertiary) !important;
 }
 
-/* ── Main flex wrapper ───────────────────────────────────── */
+/* ── Layout ───────────────────────────────────────────────── */
 .main-flex {
     position: relative;
     z-index: 5;
     flex: 1;
     display: flex;
     min-height: 0;
-    gap: 0;
 }
 
-/* ── Chat Container ──────────────────────────────────────── */
 .chat-container {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
-    background: transparent;
 }
 
-/* inner card */
+/* ── Chat Card ────────────────────────────────────────────── */
 .chat-card {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
     margin: 1rem;
-    background: rgba(255, 255, 255, 0.033);
+    background: rgba(28, 27, 27, 0.6);
     backdrop-filter: blur(28px) saturate(155%);
     -webkit-backdrop-filter: blur(28px) saturate(155%);
     border-radius: var(--r-xl);
-    border: 1px solid var(--glass-b);
+    border: 1px solid var(--brd);
     box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.025) inset,
-        0 8px 56px rgba(0, 0, 0, 0.55),
-        0 0 48px var(--glow-a),
-        0 0 80px var(--glow-b);
+        0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+        0 8px 56px rgba(0, 0, 0, 0.6),
+        0 0 50px rgba(139, 0, 0, 0.12),
+        0 0 90px rgba(255, 106, 0, 0.06);
     overflow: hidden;
 }
 
-/* ── Chat Header ─────────────────────────────────────────── */
+/* ── Chat Header ──────────────────────────────────────────── */
 .chat-header {
     display: flex;
     align-items: center;
     gap: 14px;
     padding: 1rem 1.5rem;
-    background: rgba(0, 0, 0, 0.30);
-    border-bottom: 1px solid var(--glass-b);
+    background: rgba(14, 14, 14, 0.5);
+    border-bottom: 1px solid var(--brd);
     flex-shrink: 0;
 }
 
@@ -235,20 +258,20 @@ body::after {
     width: 46px;
     height: 46px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--ember), var(--gold));
+    background: var(--grad);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
-    color: white;
-    box-shadow: 0 0 20px var(--glow-a);
+    color: #fff;
     flex-shrink: 0;
+    box-shadow: 0 0 22px rgba(139, 0, 0, 0.4);
 }
 
 .chat-header-info h6 {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 0.98rem;
-    font-weight: 600;
+    font-weight: 700;
     margin: 0;
     color: var(--txt-1);
 }
@@ -256,10 +279,9 @@ body::after {
 .chat-header-info small {
     font-size: 0.72rem;
     color: var(--txt-m);
-    letter-spacing: 0.02em;
 }
 
-/* ── Messages Area ───────────────────────────────────────── */
+/* ── Messages Area ────────────────────────────────────────── */
 .chat-messages {
     flex: 1;
     overflow-y: auto;
@@ -269,7 +291,7 @@ body::after {
     gap: 4px;
     min-height: 0;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 140, 0, 0.35) transparent;
+    scrollbar-color: rgba(139, 0, 0, 0.35) transparent;
 }
 
 .chat-messages::-webkit-scrollbar {
@@ -281,11 +303,11 @@ body::after {
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-    background: rgba(255, 140, 0, 0.35);
+    background: rgba(139, 0, 0, 0.35);
     border-radius: 999px;
 }
 
-/* ── Message Row ─────────────────────────────────────────── */
+/* ── Message Row ──────────────────────────────────────────── */
 .message-row {
     display: flex;
     align-items: flex-end;
@@ -306,11 +328,11 @@ body::after {
 
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: none;
     }
 }
 
-/* ── Avatars ─────────────────────────────────────────────── */
+/* ── Avatars ──────────────────────────────────────────────── */
 .msg-avatar {
     width: 34px;
     height: 34px;
@@ -323,18 +345,18 @@ body::after {
 }
 
 .msg-avatar.bot-av {
-    background: linear-gradient(135deg, var(--ember), var(--gold));
-    color: white;
-    box-shadow: 0 0 12px var(--glow-a);
+    background: var(--grad);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(139, 0, 0, 0.35);
 }
 
 .msg-avatar.user-av {
-    background: linear-gradient(135deg, var(--rust), var(--deep-rust));
-    color: white;
-    box-shadow: 0 0 12px rgba(201, 68, 0, 0.45);
+    background: linear-gradient(135deg, var(--tertiary-cont), var(--secondary));
+    color: #fff;
+    box-shadow: 0 0 12px rgba(99, 56, 0, 0.45);
 }
 
-/* ── Bubbles ─────────────────────────────────────────────── */
+/* ── Bubbles ──────────────────────────────────────────────── */
 .message {
     max-width: 74%;
     padding: 12px 17px;
@@ -346,36 +368,36 @@ body::after {
 }
 
 .message.bot {
-    background: rgba(255, 255, 255, 0.055);
-    border: 1px solid var(--glass-b);
+    background: rgba(28, 27, 27, 0.8);
+    border: 1px solid var(--brd);
     border-bottom-left-radius: 4px;
     color: var(--txt-1);
 }
 
 .message.user {
-    background: linear-gradient(135deg, var(--ember) 0%, var(--amber) 60%, var(--gold) 100%);
+    background: var(--grad);
     border-bottom-right-radius: 4px;
-    color: #1a0a00;
+    color: #fff;
     font-weight: 500;
-    box-shadow: 0 4px 22px var(--glow-a);
+    box-shadow: 0 4px 22px rgba(139, 0, 0, 0.3);
 }
 
-/* Markdown inside bot messages */
+/* Bot markdown */
 .message.bot h1,
 .message.bot h2 {
-    color: var(--amber);
+    color: var(--tertiary);
     margin: 0.75rem 0 0.35rem;
 }
 
 .message.bot h3,
 .message.bot h4 {
-    color: var(--gold);
+    color: var(--primary-soft);
     margin: 0.6rem 0 0.25rem;
 }
 
 .message.bot code {
-    background: rgba(255, 140, 0, 0.12);
-    color: var(--gold);
+    background: rgba(139, 0, 0, 0.15);
+    color: var(--tertiary);
     padding: 2px 6px;
     border-radius: 5px;
     font-size: 0.88em;
@@ -386,11 +408,11 @@ body::after {
     padding: 0.8rem 1rem;
     border-radius: var(--r-sm);
     overflow-x: auto;
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--bg-low);
 }
 
 .message.bot a {
-    color: var(--amber);
+    color: var(--tertiary);
     text-decoration: underline dotted;
 }
 
@@ -401,7 +423,7 @@ body::after {
 }
 
 .message.bot strong {
-    color: var(--gold);
+    color: var(--primary-soft);
 }
 
 /* Timestamp */
@@ -417,25 +439,25 @@ body::after {
     text-align: left;
 }
 
-/* ── Image in chat ───────────────────────────────────────── */
+/* ── Image in chat ────────────────────────────────────────── */
 .chat-img {
     max-width: 100%;
     max-height: 220px;
     border-radius: var(--r-md);
-    border: 1px solid var(--glass-bs);
+    border: 1px solid var(--brd-s);
     margin-bottom: 8px;
     display: block;
     object-fit: cover;
 }
 
-/* ── Image preview strip ─────────────────────────────────── */
+/* ── Image preview strip ──────────────────────────────────── */
 #image-preview-container {
     display: none;
     gap: 10px;
     align-items: center;
     padding: 10px 1.5rem;
-    background: rgba(0, 0, 0, 0.35);
-    border-top: 1px solid var(--glass-b);
+    background: rgba(14, 14, 14, 0.5);
+    border-top: 1px solid var(--brd);
     animation: slideUp 0.25s ease both;
     flex-shrink: 0;
 }
@@ -445,8 +467,8 @@ body::after {
     height: 56px;
     object-fit: cover;
     border-radius: var(--r-sm);
-    border: 2px solid var(--amber);
-    box-shadow: 0 0 10px var(--glow-a);
+    border: 2px solid var(--secondary);
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
 }
 
 .preview-label {
@@ -456,9 +478,9 @@ body::after {
 }
 
 .remove-image {
-    background: rgba(255, 60, 60, 0.12);
-    color: #ff7b7b;
-    border: 1px solid rgba(255, 60, 60, 0.28);
+    background: rgba(147, 0, 10, 0.15);
+    color: var(--err-l);
+    border: 1px solid rgba(147, 0, 10, 0.3);
     border-radius: 50%;
     width: 27px;
     height: 27px;
@@ -472,23 +494,23 @@ body::after {
 }
 
 .remove-image:hover {
-    background: rgba(255, 60, 60, 0.28);
+    background: rgba(147, 0, 10, 0.3);
     transform: scale(1.1);
 }
 
-/* ── Input Area ──────────────────────────────────────────── */
+/* ── Input Area ───────────────────────────────────────────── */
 .chat-input-area {
     padding: 0.85rem 1.1rem;
-    background: rgba(0, 0, 0, 0.30);
-    border-top: 1px solid var(--glass-b);
+    background: rgba(14, 14, 14, 0.5);
+    border-top: 1px solid var(--brd);
     flex-shrink: 0;
 }
 
 .input-group {
-    background: rgba(255, 255, 255, 0.045);
+    background: rgba(28, 27, 27, 0.7);
     border-radius: 50px;
     padding: 5px 5px 5px 10px;
-    border: 1px solid var(--glass-b);
+    border: 1px solid var(--brd);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -496,8 +518,8 @@ body::after {
 }
 
 .input-group:focus-within {
-    border-color: rgba(255, 140, 0, 0.50);
-    box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.12);
+    border-color: rgba(139, 0, 0, 0.55);
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.12);
 }
 
 .form-control {
@@ -518,10 +540,10 @@ body::after {
     outline: none;
 }
 
-/* ── Upload button ───────────────────────────────────────── */
+/* Upload btn */
 .upload-btn {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid var(--glass-b);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--brd);
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -535,14 +557,14 @@ body::after {
 }
 
 .upload-btn:hover {
-    background: rgba(255, 140, 0, 0.18);
-    color: var(--amber);
+    background: rgba(139, 0, 0, 0.2);
+    color: var(--tertiary);
     transform: scale(1.09);
 }
 
-/* ── Send button ─────────────────────────────────────────── */
+/* Send btn */
 .btn-send {
-    background: linear-gradient(135deg, var(--ember), var(--gold));
+    background: var(--grad);
     border: none;
     border-radius: 50%;
     width: 44px;
@@ -550,24 +572,24 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #1a0a00;
+    color: #fff;
     cursor: pointer;
     transition: transform var(--ease), box-shadow var(--ease);
-    box-shadow: 0 3px 14px var(--glow-a);
+    box-shadow: 0 3px 14px rgba(139, 0, 0, 0.35);
     flex-shrink: 0;
     font-size: 0.95rem;
 }
 
 .btn-send:hover {
     transform: scale(1.12) rotate(-5deg);
-    box-shadow: 0 5px 24px var(--glow-a);
+    box-shadow: 0 5px 24px rgba(255, 106, 0, 0.45);
 }
 
 .btn-send:active {
     transform: scale(0.95);
 }
 
-/* ── Loading dots ────────────────────────────────────────── */
+/* ── Loading dots ─────────────────────────────────────────── */
 .loading-dots {
     display: flex;
     align-items: center;
@@ -580,7 +602,7 @@ body::after {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--amber);
+    background: var(--secondary);
     animation: blink 1.2s infinite ease-in-out both;
 }
 
@@ -611,13 +633,13 @@ body::after {
     }
 }
 
-/* ── Welcome / system bubble ─────────────────────────────── */
+/* ── Welcome bubble ───────────────────────────────────────── */
 .message.bot.welcome {
-    background: linear-gradient(135deg, rgba(255, 106, 0, 0.10), rgba(255, 184, 0, 0.08));
-    border-color: rgba(255, 140, 0, 0.28);
+    background: linear-gradient(135deg, rgba(139, 0, 0, 0.12), rgba(255, 106, 0, 0.06));
+    border-color: rgba(139, 0, 0, 0.25);
 }
 
-/* ── Divider (date) ──────────────────────────────────────── */
+/* ── Date divider ─────────────────────────────────────────── */
 .chat-divider {
     text-align: center;
     font-size: 0.68rem;
@@ -629,20 +651,19 @@ body::after {
 }
 
 .chat-divider span {
-    background: rgba(255, 140, 0, 0.08);
-    border: 1px solid var(--glass-b);
+    background: rgba(139, 0, 0, 0.08);
+    border: 1px solid var(--brd);
     border-radius: 20px;
     padding: 3px 12px;
 }
 
-/* ── Documents Side Panel ────────────────────────────────── */
+/* ── Docs Side Panel ──────────────────────────────────────── */
 #docs-panel {
     width: 270px;
-    background: rgba(255, 255, 255, 0.025);
+    background: rgba(28, 27, 27, 0.5);
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-left: 1px solid var(--glass-b);
-    transition: width var(--ease);
+    border-left: 1px solid var(--brd);
+    overflow-y: auto;
 }
 
 #docs-panel h6 {
@@ -651,33 +672,33 @@ body::after {
     font-weight: 700;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: var(--amber);
+    color: var(--tertiary);
 }
 
 #docs-panel .btn-outline-light {
-    border-color: var(--glass-b) !important;
+    border-color: var(--brd) !important;
     color: var(--txt-1) !important;
     font-size: 0.8rem;
     transition: background var(--ease), border-color var(--ease);
 }
 
 #docs-panel .btn-outline-light:hover {
-    background: rgba(255, 140, 0, 0.15) !important;
-    border-color: var(--glass-bs) !important;
+    background: rgba(139, 0, 0, 0.18) !important;
+    border-color: var(--brd-s) !important;
 }
 
-/* ── Modal dark theme ────────────────────────────────────── */
+/* ── Modal ────────────────────────────────────────────────── */
 .modal-content {
-    background: #110a04 !important;
-    border: 1px solid var(--glass-b) !important;
+    background: var(--bg-low) !important;
+    border: 1px solid var(--brd) !important;
 }
 
 .modal-header {
-    border-color: var(--glass-b) !important;
+    border-color: var(--brd) !important;
 }
 
 .modal-footer {
-    border-color: var(--glass-b) !important;
+    border-color: var(--brd) !important;
 }
 
 .modal-body {
@@ -687,31 +708,31 @@ body::after {
 
 .modal-body h1,
 .modal-body h2 {
-    color: var(--amber);
+    color: var(--tertiary);
     margin: 1rem 0 0.4rem;
 }
 
 .modal-body h3,
 .modal-body h4 {
-    color: var(--gold);
+    color: var(--primary-soft);
 }
 
 .modal-body code {
-    background: rgba(255, 140, 0, 0.12);
-    color: var(--gold);
+    background: rgba(139, 0, 0, 0.15);
+    color: var(--tertiary);
     padding: 2px 6px;
     border-radius: 4px;
 }
 
-/* ── Generated DOCUMENT XML blocks ──────────────────────── */
+/* ── Generated DOCUMENT XML blocks ───────────────────────── */
 document {
     display: block;
-    background: rgba(255, 140, 0, 0.04);
-    border-left: 4px solid var(--amber);
+    background: rgba(139, 0, 0, 0.05);
+    border-left: 4px solid var(--secondary);
     padding: 1.5rem;
     margin: 1.25rem 0;
     border-radius: 0 var(--r-md) var(--r-md) 0;
-    box-shadow: 0 4px 20px rgba(255, 106, 0, 0.12);
+    box-shadow: 0 4px 20px rgba(139, 0, 0, 0.12);
     position: relative;
 }
 
@@ -720,7 +741,7 @@ document::before {
     display: block;
     font-size: 0.70rem;
     font-weight: 700;
-    color: var(--amber);
+    color: var(--secondary);
     letter-spacing: 1.5px;
     margin-bottom: 1rem;
     text-transform: uppercase;
@@ -731,7 +752,7 @@ document title {
     font-size: 1.55rem;
     font-weight: 700;
     color: var(--txt-1);
-    border-bottom: 1px solid var(--glass-bs);
+    border-bottom: 1px solid var(--brd-s);
     padding-bottom: 0.5rem;
     margin-bottom: 0.4rem;
 }
@@ -740,7 +761,7 @@ document subtitle {
     display: block;
     font-size: 1.05rem;
     font-weight: 600;
-    color: var(--gold);
+    color: var(--tertiary);
     margin-bottom: 1.2rem;
 }
 
@@ -751,23 +772,23 @@ document section {
     display: block;
     margin-top: 1rem;
     padding: 1.15rem;
-    background: rgba(0, 0, 0, 0.22);
+    background: rgba(14, 14, 14, 0.3);
     border-radius: var(--r-sm);
-    border: 1px solid rgba(255, 200, 100, 0.07);
+    border: 1px solid var(--brd);
 }
 
 document para {
     display: block;
     margin-bottom: 0.9rem;
     line-height: 1.72;
-    color: var(--txt-1);
+    color: var(--txt-var);
 }
 
 document para:last-child {
     margin-bottom: 0;
 }
 
-/* ── Responsive ──────────────────────────────────────────── */
+/* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 600px) {
     .chat-card {
         margin: 0.5rem;

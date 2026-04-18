@@ -12,17 +12,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --red: #8B0000;
-            --red-h: #a80000;
-            --orange: #FF6A00;
-            --amber: #FFA94D;
-            --bg: #121212;
-            --bg-card: #1a1a1a;
-            --bg-input: #222222;
-            --border: rgba(255, 106, 0, .18);
-            --border-h: rgba(255, 106, 0, .45);
-            --txt-1: #F5F0EA;
-            --txt-m: rgba(245, 235, 220, .5);
+            --primary: #8B0000;
+            --secondary: #FF6A00;
+            --tertiary: #FFB871;
+            --prim-soft: #FFB4A8;
+            --bg: #131313;
+            --bg-low: #1C1B1B;
+            --bg-card: #1C1B1B;
+            --bg-input: #252525;
+            --txt-1: #E5E2E1;
+            --txt-var: #E3BEB8;
+            --txt-m: rgba(229, 226, 225, .5);
+            --brd: rgba(90, 64, 60, .55);
+            --brd-h: rgba(255, 106, 0, .45);
+            --err: #93000A;
+            --err-l: #FFB4AB;
+            --grad: linear-gradient(135deg, #8B0000, #FF6A00);
             --ease: 0.22s cubic-bezier(.4, 0, .2, 1);
         }
 
@@ -48,7 +53,6 @@
             min-height: 100vh;
         }
 
-        /*── Animated BG ── */
         body::before {
             content: '';
             position: fixed;
@@ -56,29 +60,28 @@
             z-index: 0;
             pointer-events: none;
             background:
-                radial-gradient(ellipse 70% 55% at 15% 10%, rgba(139, 0, 0, .22) 0%, transparent 65%),
-                radial-gradient(ellipse 55% 45% at 88% 88%, rgba(255, 106, 0, .16) 0%, transparent 60%),
-                radial-gradient(ellipse 45% 40% at 50% 50%, rgba(255, 169, 77, .06) 0%, transparent 55%);
+                radial-gradient(ellipse 70% 55% at 12% 8%, rgba(139, 0, 0, .22) 0%, transparent 65%),
+                radial-gradient(ellipse 55% 45% at 88% 88%, rgba(255, 106, 0, .14) 0%, transparent 60%);
         }
 
-        /* ── Navbar ── */
         nav {
             position: relative;
             z-index: 10;
+            flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 1rem 2rem;
-            background: rgba(18, 18, 18, .8);
-            backdrop-filter: blur(18px);
-            border-bottom: 1px solid var(--border);
+            padding: 0.95rem 2rem;
+            background: rgba(14, 14, 14, .82);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--brd);
         }
 
         .brand {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 1.15rem;
             font-weight: 800;
-            background: linear-gradient(90deg, var(--orange), var(--amber));
+            background: linear-gradient(90deg, var(--secondary), var(--tertiary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -90,28 +93,27 @@
 
         .brand i {
             -webkit-text-fill-color: initial;
-            color: var(--orange);
-            filter: drop-shadow(0 0 7px var(--orange));
+            color: var(--secondary);
+            filter: drop-shadow(0 0 7px rgba(139, 0, 0, .6));
         }
 
-        .nav-link-ghost {
-            font-size: .85rem;
-            font-weight: 500;
-            color: var(--txt-m);
+        .nav-pill {
+            font-size: .83rem;
+            font-weight: 600;
+            color: var(--txt-var);
             text-decoration: none;
-            padding: .4rem .9rem;
-            border: 1px solid var(--border);
-            border-radius: 9px;
+            padding: .42rem 1rem;
+            border: 1px solid var(--brd);
+            border-radius: 10px;
             transition: all var(--ease);
         }
 
-        .nav-link-ghost:hover {
-            color: var(--amber);
-            border-color: var(--border-h);
-            background: rgba(255, 106, 0, .07);
+        .nav-pill:hover {
+            color: var(--tertiary);
+            border-color: var(--brd-h);
+            background: rgba(139, 0, 0, .1);
         }
 
-        /* ── Main wrapper ── */
         main {
             position: relative;
             z-index: 5;
@@ -122,22 +124,20 @@
             padding: 2.5rem 1.25rem;
         }
 
-        /* ── Auth Card ── */
         .auth-card {
             width: 100%;
             max-width: 440px;
             background: var(--bg-card);
-            border: 1px solid var(--border);
+            border: 1px solid var(--brd);
             border-radius: 22px;
             padding: 2.75rem 2.25rem;
             box-shadow:
-                0 0 0 1px rgba(255, 255, 255, .03) inset,
-                0 8px 48px rgba(0, 0, 0, .55),
-                0 0 60px rgba(139, 0, 0, .12),
-                0 0 100px rgba(255, 106, 0, .07);
+                0 0 0 1px rgba(255, 255, 255, .025) inset,
+                0 8px 48px rgba(0, 0, 0, .6),
+                0 0 60px rgba(139, 0, 0, .14),
+                0 0 100px rgba(255, 106, 0, .06);
         }
 
-        /* ── Logo ── */
         .auth-logo {
             display: flex;
             align-items: center;
@@ -149,31 +149,29 @@
             width: 48px;
             height: 48px;
             border-radius: 14px;
-            background: linear-gradient(135deg, var(--red), var(--orange));
+            background: var(--grad);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.25rem;
             color: #fff;
-            box-shadow: 0 4px 18px rgba(139, 0, 0, .35);
+            box-shadow: 0 4px 18px rgba(139, 0, 0, .4);
         }
 
         .auth-logo-text {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 1.25rem;
             font-weight: 800;
-            background: linear-gradient(90deg, var(--orange), var(--amber));
+            background: linear-gradient(90deg, var(--secondary), var(--tertiary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        /* ── Headings ── */
-        .auth-title {
+        .auth-heading {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 1.6rem;
             font-weight: 800;
-            color: var(--txt-1);
             margin-bottom: .35rem;
         }
 
@@ -184,11 +182,10 @@
             line-height: 1.6;
         }
 
-        /* ── Error alert ── */
         .auth-error {
-            background: rgba(139, 0, 0, .15);
-            border: 1px solid rgba(139, 0, 0, .35);
-            color: #ffaaaa;
+            background: rgba(147, 0, 10, .15);
+            border: 1px solid rgba(147, 0, 10, .35);
+            color: var(--err-l);
             border-radius: 10px;
             font-size: .84rem;
             padding: .65rem 1rem;
@@ -198,26 +195,25 @@
             gap: .6rem;
         }
 
-        /* ── Form ── */
         .form-group {
             margin-bottom: 1.25rem;
         }
 
-        label.field-label {
+        label.lbl {
             display: block;
-            font-size: .78rem;
+            font-size: .76rem;
             font-weight: 600;
             color: var(--txt-m);
-            letter-spacing: .04em;
-            margin-bottom: .5rem;
+            letter-spacing: .05em;
             text-transform: uppercase;
+            margin-bottom: .5rem;
         }
 
-        .field-wrap {
+        .iw {
             position: relative;
         }
 
-        .field-icon {
+        .iw i.ico {
             position: absolute;
             left: 1rem;
             top: 50%;
@@ -228,13 +224,17 @@
             transition: color var(--ease);
         }
 
+        .iw:focus-within i.ico {
+            color: var(--secondary);
+        }
+
         input[type="text"],
         input[type="password"] {
             width: 100%;
             padding: .78rem 1rem .78rem 2.6rem;
             background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            border: 1px solid var(--brd);
+            border-radius: 11px;
             color: var(--txt-1);
             font-size: .92rem;
             font-family: inherit;
@@ -243,36 +243,26 @@
         }
 
         input:focus {
-            border-color: var(--orange);
-            box-shadow: 0 0 0 3px rgba(255, 106, 0, .14);
-        }
-
-        input:focus+.field-icon-after {
-            color: var(--orange);
-        }
-
-        .field-wrap:focus-within .field-icon {
-            color: var(--orange);
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(255, 106, 0, .12);
         }
 
         input::placeholder {
-            color: rgba(245, 235, 220, .25);
+            color: rgba(229, 226, 225, .22);
         }
 
-        /* ── Submit ── */
-        .btn-submit {
+        .btn-main {
             width: 100%;
             padding: .82rem;
-            background: linear-gradient(135deg, var(--red), var(--orange));
+            background: var(--grad);
             border: none;
-            border-radius: 12px;
+            border-radius: 11px;
             font-size: .95rem;
             font-weight: 700;
             font-family: inherit;
             color: #fff;
             cursor: pointer;
-            letter-spacing: .01em;
-            box-shadow: 0 4px 20px rgba(139, 0, 0, .35);
+            box-shadow: 0 4px 22px rgba(139, 0, 0, .38);
             transition: transform var(--ease), box-shadow var(--ease);
             display: flex;
             align-items: center;
@@ -280,23 +270,22 @@
             gap: .6rem;
         }
 
-        .btn-submit:hover {
+        .btn-main:hover {
             transform: translateY(-2px);
-            box-shadow: 0 7px 28px rgba(255, 106, 0, .4);
+            box-shadow: 0 7px 30px rgba(255, 106, 0, .4);
         }
 
-        .btn-submit:active {
+        .btn-main:active {
             transform: scale(.98);
         }
 
-        /* ── Divider ── */
         .divider {
             display: flex;
             align-items: center;
             gap: .75rem;
             margin: 1.5rem 0;
             color: var(--txt-m);
-            font-size: .76rem;
+            font-size: .74rem;
         }
 
         .divider::before,
@@ -304,40 +293,37 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: var(--border);
+            background: var(--brd);
         }
 
-        /* ── Link ── */
-        .auth-footer {
+        .auth-foot {
             text-align: center;
             font-size: .86rem;
             color: var(--txt-m);
         }
 
-        .auth-footer a {
-            color: var(--amber);
+        .auth-foot a {
+            color: var(--tertiary);
             font-weight: 600;
             text-decoration: none;
             transition: color var(--ease);
         }
 
-        .auth-footer a:hover {
-            color: var(--orange);
+        .auth-foot a:hover {
+            color: var(--secondary);
         }
 
-        /* ── Footer bar ── */
         footer {
             position: relative;
             z-index: 10;
             text-align: center;
-            padding: 1.1rem;
+            padding: 1rem;
             font-size: .72rem;
             color: var(--txt-m);
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--brd);
         }
 
-        /* ── Responsive ── */
-        @media (max-width: 500px) {
+        @media (max-width: 480px) {
             nav {
                 padding: .8rem 1rem;
             }
@@ -347,7 +333,7 @@
                 border-radius: 18px;
             }
 
-            .auth-title {
+            .auth-heading {
                 font-size: 1.4rem;
             }
         }
@@ -355,62 +341,48 @@
 </head>
 
 <body>
-
     <nav>
-        <a class="brand" href="/landing">
-            <i class="fas fa-brain"></i> Wasla Master
-        </a>
-        <a class="nav-link-ghost" href="/register"><i class="fas fa-user-plus me-1"></i>Sign Up Free</a>
+        <a class="brand" href="/landing"><i class="fas fa-brain"></i> Wasla Master</a>
+        <a class="nav-pill" href="/register"><i class="fas fa-user-plus"></i> &nbsp;Sign Up Free</a>
     </nav>
-
     <main>
         <div class="auth-card">
             <div class="auth-logo">
                 <div class="auth-logo-icon"><i class="fas fa-brain"></i></div>
                 <span class="auth-logo-text">Wasla Edu</span>
             </div>
-
-            <h1 class="auth-title">Welcome back 👋</h1>
+            <h1 class="auth-heading">Welcome back 👋</h1>
             <p class="auth-sub">Sign in to continue your learning journey with Wasla.</p>
 
             {% if error %}
-            <div class="auth-error">
-                <i class="fas fa-exclamation-circle"></i> {{ error }}
-            </div>
+            <div class="auth-error"><i class="fas fa-exclamation-circle"></i> {{ error }}</div>
             {% endif %}
 
             <form method="post" action="/login">
                 <div class="form-group">
-                    <label class="field-label" for="username">Username</label>
-                    <div class="field-wrap">
-                        <i class="fas fa-user field-icon"></i>
+                    <label class="lbl" for="username">Username</label>
+                    <div class="iw">
+                        <i class="fas fa-user ico"></i>
                         <input type="text" id="username" name="username" placeholder="Enter your username" required
                             autofocus autocomplete="username">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="field-label" for="password">Password</label>
-                    <div class="field-wrap">
-                        <i class="fas fa-lock field-icon"></i>
+                    <label class="lbl" for="password">Password</label>
+                    <div class="iw">
+                        <i class="fas fa-lock ico"></i>
                         <input type="password" id="password" name="password" placeholder="Enter your password" required
                             autocomplete="current-password">
                     </div>
                 </div>
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-sign-in-alt"></i> Sign In
-                </button>
+                <button type="submit" class="btn-main"><i class="fas fa-sign-in-alt"></i> Sign In</button>
             </form>
 
             <div class="divider">OR</div>
-
-            <div class="auth-footer">
-                Don't have an account? <a href="/register">Create one free →</a>
-            </div>
+            <div class="auth-foot">Don't have an account? <a href="/register">Create one free →</a></div>
         </div>
     </main>
-
-    <footer>© 2026 Wasla Edu — AI-Powered Learning</footer>
-
+    <footer>© 2026 Wasla Edu — Crimson Hearth Theme</footer>
 </body>
 
 </html>
