@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wasla Edu — AI-Powered Learning Platform</title>
+    <meta name="description"
+        content="Wasla Edu is an AI-powered educational assistant that helps learners understand, memorize, and master course material with vision, RAG, and semantic memory.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ── Base ── */
+        :root {
+            --ember: #ff6a00;
+            --amber: #ff8c00;
+            --gold: #ffb800;
+            --rust: #ea580c;
+            --bg-1: #07040a;
+            --bg-2: #100804;
+            --txt-1: #fff3e6;
+            --txt-m: rgba(255, 240, 210, 0.52);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg-1);
+            color: var(--txt-1);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 55% at 15% 10%, rgba(255, 106, 0, .22) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 50% at 85% 85%, rgba(255, 184, 0, .14) 0%, transparent 60%),
+                linear-gradient(165deg, var(--bg-1) 0%, var(--bg-2) 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ── Navbar ── */
+        .lp-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(7, 4, 10, 0.72);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 200, 100, .10);
+            padding: 0.85rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .lp-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--ember), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            text-decoration: none;
+        }
+
+        .lp-brand i {
+            -webkit-text-fill-color: initial;
+            color: var(--amber);
+            filter: drop-shadow(0 0 8px var(--ember));
+        }
+
+        .lp-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .lp-link {
+            color: var(--txt-m);
+            font-size: 0.88rem;
+            font-weight: 500;
+            text-decoration: none;
+            padding: 0.4rem 0.6rem;
+            border-radius: 8px;
+            transition: color .2s, background .2s;
+        }
+
+        .lp-link:hover {
+            color: var(--txt-1);
+            background: rgba(255, 140, 0, .09);
+        }
+
+        .btn-nav-login {
+            border: 1px solid rgba(255, 200, 100, .25);
+            border-radius: 10px;
+            padding: 0.45rem 1.1rem;
+            color: var(--amber);
+            background: transparent;
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all .2s;
+        }
+
+        .btn-nav-login:hover {
+            background: rgba(255, 140, 0, .12);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+
+        .btn-nav-cta {
+            background: linear-gradient(135deg, var(--ember), var(--gold));
+            border: none;
+            border-radius: 10px;
+            padding: 0.45rem 1.2rem;
+            color: #1a0a00;
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all .2s;
+            box-shadow: 0 3px 14px rgba(255, 106, 0, .3);
+        }
+
+        .btn-nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 22px rgba(255, 106, 0, .45);
+            color: #1a0a00;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 1.5rem 4rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 140, 0, .08);
+            border: 1px solid rgba(255, 200, 100, .18);
+            border-radius: 50px;
+            padding: 0.4rem 1.1rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: var(--amber);
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.7s ease both;
+        }
+
+        .hero-badge span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 6px #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .5
+            }
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.6rem, 7vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            animation: fadeInDown 0.8s 0.1s ease both;
+        }
+
+        .hero-title .grad {
+            background: linear-gradient(90deg, var(--ember), var(--amber), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: var(--txt-m);
+            max-width: 600px;
+            line-height: 1.75;
+            margin-bottom: 2.5rem;
+            animation: fadeInDown 0.8s 0.2s ease both;
+        }
+
+        .hero-ctas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            animation: fadeInDown 0.8s 0.3s ease both;
+        }
+
+        .btn-hero-primary {
+            background: linear-gradient(135deg, var(--ember), var(--gold));
+            border: none;
+            border-radius: 14px;
+            padding: 0.85rem 2.2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a0a00;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            box-shadow: 0 4px 24px rgba(255, 106, 0, .38);
+            transition: all .22s;
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 36px rgba(255, 106, 0, .55);
+            color: #1a0a00;
+        }
+
+        .btn-hero-secondary {
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 200, 100, .2);
+            border-radius: 14px;
+            padding: 0.85rem 2.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--txt-1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            backdrop-filter: blur(10px);
+            transition: all .22s;
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(255, 140, 0, .1);
+            border-color: var(--amber);
+            color: var(--txt-1);
+            transform: translateY(-2px);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 3.5rem;
+            animation: fadeIn 1s 0.5s ease both;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--amber), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--txt-m);
+            margin-top: 0.2rem;
+            letter-spacing: 0.04em;
+        }
+
+        /* floating cards preview */
+        .hero-visual {
+            position: relative;
+            z-index: 1;
+            margin-top: 4rem;
+            animation: fadeInUp 1s 0.4s ease both;
+        }
+
+        .chat-preview {
+            background: rgba(255, 255, 255, .038);
+            border: 1px solid rgba(255, 200, 100, .12);
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-width: 680px;
+            margin: 0 auto;
+            backdrop-filter: blur(24px);
+            box-shadow: 0 8px 56px rgba(0, 0, 0, .55), 0 0 48px rgba(255, 106, 0, .15);
+        }
+
+        .chat-preview-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid rgba(255, 200, 100, .08);
+            padding-bottom: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .cp-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--ember), var(--gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: #1a0a00;
+            box-shadow: 0 0 16px rgba(255, 106, 0, .35);
+        }
+
+        .cp-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .cp-sub {
+            font-size: 0.72rem;
+            color: var(--txt-m);
+        }
+
+        .cp-dots {
+            display: flex;
+            gap: 5px;
+            margin-left: auto;
+        }
+
+        .cp-dots span {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+        }
+
+        .cp-dots span:nth-child(1) {
+            background: #ff5f56;
+        }
+
+        .cp-dots span:nth-child(2) {
+            background: #febc2e;
+        }
+
+        .cp-dots span:nth-child(3) {
+            background: #27c93f;
+        }
+
+        .cp-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .cp-bubble {
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            max-width: 85%;
+        }
+
+        .cp-bubble.bot {
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 200, 100, .1);
+        }
+
+        .cp-bubble.user {
+            background: linear-gradient(135deg, var(--ember), var(--gold));
+            color: #1a0a00;
+            font-weight: 500;
+            align-self: flex-end;
+        }
+
+        /* ── Section base ── */
+        section {
+            position: relative;
+            z-index: 1;
+            padding: 6rem 1.5rem;
+        }
+
+        .section-label {
+            display: inline-block;
+            background: rgba(255, 140, 0, .1);
+            border: 1px solid rgba(255, 200, 100, .2);
+            border-radius: 50px;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.73rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--amber);
+            text-transform: uppercase;
+            margin-bottom: 1.1rem;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .section-sub {
+            font-size: 1rem;
+            color: var(--txt-m);
+            max-width: 560px;
+            line-height: 1.75;
+            margin-top: 0.75rem;
+        }
+
+        /* ── Features ── */
+        #features {
+            background: rgba(255, 255, 255, .015);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 1.25rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, .035);
+            border: 1px solid rgba(255, 200, 100, .1);
+            border-radius: 18px;
+            padding: 1.75rem;
+            transition: transform .25s, box-shadow .25s, border-color .25s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(255, 106, 0, .18);
+            border-color: rgba(255, 200, 100, .28);
+        }
+
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(255, 106, 0, .2), rgba(255, 184, 0, .12));
+            border: 1px solid rgba(255, 200, 100, .15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.45rem;
+            color: var(--amber);
+            margin-bottom: 1.1rem;
+        }
+
+        .feature-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            font-size: 0.88rem;
+            color: var(--txt-m);
+            line-height: 1.7;
+        }
+
+        /* ── How To Use ── */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+            max-width: 750px;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            flex-shrink: 0;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--ember), var(--gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #1a0a00;
+            box-shadow: 0 4px 18px rgba(255, 106, 0, .3);
+        }
+
+        .step-body {
+            padding-top: 0.5rem;
+        }
+
+        .step-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .step-desc {
+            font-size: 0.9rem;
+            color: var(--txt-m);
+            line-height: 1.7;
+        }
+
+        /* ── Roles ── */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .role-card-lp {
+            background: rgba(255, 255, 255, .038);
+            border: 1px solid rgba(255, 200, 100, .12);
+            border-radius: 22px;
+            padding: 2.25rem;
+            transition: transform .25s, box-shadow .25s;
+        }
+
+        .role-card-lp:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 36px rgba(255, 106, 0, .18);
+        }
+
+        .role-icon-big {
+            font-size: 2.8rem;
+            color: var(--amber);
+            filter: drop-shadow(0 0 12px rgba(255, 140, 0, .4));
+            margin-bottom: 1.25rem;
+            display: block;
+        }
+
+        .role-name-big {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .role-desc-big {
+            font-size: 0.9rem;
+            color: var(--txt-m);
+            line-height: 1.7;
+            margin-bottom: 1.25rem;
+        }
+
+        .role-bullets {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .role-bullets li {
+            font-size: 0.88rem;
+            color: rgba(255, 240, 210, .7);
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        .role-bullets li i {
+            color: var(--amber);
+            font-size: 0.78rem;
+            flex-shrink: 0;
+        }
+
+        /* ── CTA Banner ── */
+        .cta-banner {
+            background: linear-gradient(135deg, rgba(255, 106, 0, .12), rgba(255, 184, 0, .07));
+            border: 1px solid rgba(255, 200, 100, .18);
+            border-radius: 28px;
+            text-align: center;
+            padding: 4rem 2rem;
+            box-shadow: 0 0 60px rgba(255, 106, 0, .1);
+        }
+
+        .cta-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .cta-sub {
+            font-size: 1rem;
+            color: var(--txt-m);
+            max-width: 480px;
+            margin: 0 auto 2rem;
+            line-height: 1.7;
+        }
+
+        /* ── Footer ── */
+        footer {
+            position: relative;
+            z-index: 1;
+            border-top: 1px solid rgba(255, 200, 100, .08);
+            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        footer .brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--ember), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        footer .copy {
+            font-size: 0.78rem;
+            color: var(--txt-m);
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* scroll reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity .7s ease, transform .7s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* ── Responsive ── */
+        @media(max-width: 768px) {
+            .roles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .lp-nav-links .lp-link {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── Nav ─────────────────────────────────────────────────────────── -->
+    <nav class="lp-nav">
+        <a class="lp-brand" href="/landing">
+            <i class="fas fa-brain"></i> Wasla Master
+        </a>
+        <div class="lp-nav-links">
+            <a class="lp-link" href="#features">Features</a>
+            <a class="lp-link" href="#how-to-use">How it Works</a>
+            <a class="lp-link" href="#roles">For Who</a>
+            <a class="btn-nav-login" href="/login">Login</a>
+            <a class="btn-nav-cta" href="/register">Sign Up Free</a>
+        </div>
+    </nav>
+
+    <!-- ── Hero ─────────────────────────────────────────────────────────── -->
+    <section class="hero" id="home">
+        <div class="hero-badge">
+            <span></span> AI-Powered Education Platform
+        </div>
+        <h1 class="hero-title">
+            Learn Smarter with<br>
+            <span class="grad">Wasla Edu Assistant</span>
+        </h1>
+        <p class="hero-sub">
+            An intelligent educational companion powered by RAG, Vision AI, and Semantic Memory.
+            Whether you're a student mastering concepts or a tutor building lesson plans — Wasla has you covered.
+        </p>
+        <div class="hero-ctas">
+            <a href="/register" class="btn-hero-primary">
+                <i class="fas fa-rocket"></i> Start Free Trial
+            </a>
+            <a href="/login" class="btn-hero-secondary">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+            <a href="#how-to-use" class="btn-hero-secondary">
+                <i class="fas fa-play-circle"></i> See How It Works
+            </a>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-num">RAG</div>
+                <div class="stat-label">Document Intelligence</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">🧠</div>
+                <div class="stat-label">Semantic Memory</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">👁️</div>
+                <div class="stat-label">Vision AI</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">2</div>
+                <div class="stat-label">Roles: Learner & Helper</div>
+            </div>
+        </div>
+
+        <!-- chat preview card -->
+        <div class="hero-visual" style="width: 100%; max-width: 680px;">
+            <div class="chat-preview">
+                <div class="chat-preview-header">
+                    <div class="cp-avatar"><i class="fas fa-brain"></i></div>
+                    <div>
+                        <div class="cp-title">Wasla Edu Assistant</div>
+                        <div class="cp-sub">Vision-enabled · RAG-powered · Semantic Memory</div>
+                    </div>
+                    <div class="cp-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+                <div class="cp-messages">
+                    <div class="cp-bubble user">Can you explain the main benefits of cloud computing?</div>
+                    <div class="cp-bubble bot">
+                        ☁️ Cloud computing offers <strong>scalability</strong>, <strong>cost efficiency</strong>, and
+                        <strong>global accessibility</strong>. You only pay for what you use, and you can scale up or
+                        down instantly — no need for expensive on-premises hardware.
+                    </div>
+                    <div class="cp-bubble user">Create a study plan for this topic and let me download it.</div>
+                    <div class="cp-bubble bot">
+                        📄 <strong>Generated:</strong> <span
+                            style="color:#ffb800; text-decoration:underline">cloud_computing_study_plan.md</span> —
+                        ingested into your session RAG automatically!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Features ─────────────────────────────────────────────────────── -->
+    <section id="features">
+        <div style="max-width: 1100px; margin: 0 auto;">
+            <div class="text-center reveal">
+                <div class="section-label">✨ Features</div>
+                <h2 class="section-title">Everything you need to learn & teach</h2>
+                <p class="section-sub mx-auto">Wasla combines the latest AI technologies into one seamless platform
+                    designed for real educational workflows.</p>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-database"></i></div>
+                    <div class="feature-title">RAG Document Intelligence</div>
+                    <div class="feature-desc">Upload PDFs, notes, and course docs — the AI reads and uses them to answer
+                        your exact questions with source grounding.</div>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-eye"></i></div>
+                    <div class="feature-title">Vision AI</div>
+                    <div class="feature-desc">Send images of diagrams, equations, or handwritten notes. Wasla analyzes
+                        them visually and explains what it sees.</div>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                    <div class="feature-title">Semantic Memory</div>
+                    <div class="feature-desc">Wasla remembers previous conversations intelligently — solved problems are
+                        stored semantically and reused in future sessions.</div>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-file-download"></i></div>
+                    <div class="feature-title">Generate & Download Docs</div>
+                    <div class="feature-desc">Ask Wasla to create a study plan, summarize a topic, or generate a quiz —
+                        then download it as a Markdown file instantly.</div>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <div class="feature-title">Role-Based Experience</div>
+                    <div class="feature-desc">Learners get personalized tutoring. Helpers get lesson planning, question
+                        generation, and curriculum structuring tools.</div>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="feature-title">Semantic Caching</div>
+                    <div class="feature-desc">Repeated questions are answered instantly from a smart cache — no
+                        redundant LLM calls, blazing fast responses.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── How To Use ────────────────────────────────────────────────────── -->
+    <section id="how-to-use" style="background: rgba(255,255,255,.012);">
+        <div
+            style="max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;">
+            <div class="reveal">
+                <div class="section-label">🚀 How It Works</div>
+                <h2 class="section-title">Up and running in minutes</h2>
+                <p class="section-sub">No complex setup. Just sign up, upload your material, and start learning with AI
+                    support.</p>
+            </div>
+            <div class="steps reveal">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <div class="step-title">Create your account</div>
+                        <div class="step-desc">Register as a Learner or Helper. Your role customises the AI's behaviour
+                            from the start.</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-body">
+                        <div class="step-title">Upload your course material</div>
+                        <div class="step-desc">Helpers can upload PDFs, slides, or notes. Everything is automatically
+                            indexed into the AI's knowledge base.</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-body">
+                        <div class="step-title">Chat, ask, and explore</div>
+                        <div class="step-desc">Ask questions in plain language. Send images for visual analysis. The AI
+                            retrieves relevant knowledge and responds accurately.</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-body">
+                        <div class="step-title">Generate & download documents</div>
+                        <div class="step-desc">Ask for a study plan, summary, or quiz — get a downloadable file and have
+                            it available in your next session too.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Roles / About ─────────────────────────────────────────────────── -->
+    <section id="roles">
+        <div style="max-width: 1100px; margin: 0 auto;">
+            <div class="text-center reveal">
+                <div class="section-label">👥 For Everyone</div>
+                <h2 class="section-title">Built for Learners & Helpers alike</h2>
+                <p class="section-sub mx-auto">Wasla adapts its entire personality and toolset based on who you are.</p>
+            </div>
+            <div class="roles-grid reveal" style="margin-top: 3rem;">
+                <div class="role-card-lp">
+                    <i class="fas fa-graduation-cap role-icon-big"></i>
+                    <div class="role-name-big">Learner</div>
+                    <div class="role-desc-big">Students and self-learners who want personalized AI support to
+                        understand, memorize, and master their course content.</div>
+                    <ul class="role-bullets">
+                        <li><i class="fas fa-check-circle"></i> Ask questions about your course material</li>
+                        <li><i class="fas fa-check-circle"></i> Get step-by-step explanations</li>
+                        <li><i class="fas fa-check-circle"></i> Upload images of problems or diagrams</li>
+                        <li><i class="fas fa-check-circle"></i> Download AI-generated study guides</li>
+                        <li><i class="fas fa-check-circle"></i> Memory recalls past sessions for continuity</li>
+                    </ul>
+                </div>
+                <div class="role-card-lp">
+                    <i class="fas fa-chalkboard-teacher role-icon-big"></i>
+                    <div class="role-name-big">Helper (Tutor / Teacher)</div>
+                    <div class="role-desc-big">Educators and tutors who want to plan lessons, generate assessments, and
+                        manage student course material all in one place.</div>
+                    <ul class="role-bullets">
+                        <li><i class="fas fa-check-circle"></i> Upload and index course documents</li>
+                        <li><i class="fas fa-check-circle"></i> Generate lesson plans and working schedules</li>
+                        <li><i class="fas fa-check-circle"></i> Create quizzes and exam questions</li>
+                        <li><i class="fas fa-check-circle"></i> Download professional PDF-ready notes</li>
+                        <li><i class="fas fa-check-circle"></i> AI adapts to your teaching style</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── CTA ────────────────────────────────────────────────────────────── -->
+    <section style="padding: 4rem 1.5rem 6rem;">
+        <div style="max-width: 860px; margin: 0 auto;">
+            <div class="cta-banner reveal">
+                <h2 class="cta-title">Ready to transform how you learn? 🔥</h2>
+                <p class="cta-sub">Join Wasla for free. No credit card needed. Start your AI-powered learning journey
+                    today.</p>
+                <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+                    <a href="/register" class="btn-hero-primary">
+                        <i class="fas fa-rocket"></i> Start Free — It's Free
+                    </a>
+                    <a href="/login" class="btn-hero-secondary">
+                        <i class="fas fa-sign-in-alt"></i> Already have an account?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+    <footer>
+        <span class="brand"><i class="fas fa-brain"
+                style="-webkit-text-fill-color:initial;color:#ff8c00;margin-right:.45rem"></i>Wasla Master</span>
+        <span class="copy">© 2026 Wasla Edu — Built with ❤️ and 🔥 for learners everywhere.</span>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        /* Scroll reveal */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.12 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+</body>
+
+</html>

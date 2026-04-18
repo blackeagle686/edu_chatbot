@@ -108,11 +108,16 @@ async def logout():
 # ─────────────────────────────────────────────────────────────────────────────
 # Main App Routes
 # ─────────────────────────────────────────────────────────────────────────────
+@app.get("/landing", response_class=HTMLResponse)
+async def landing(request: Request):
+    return templates.TemplateResponse("landing.html", {"request": request})
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request, session: str = Cookie(default=None)):
     user = _get_user(session)
     if not user:
-        return RedirectResponse("/login", status_code=302)
+        return RedirectResponse("/landing", status_code=302)
     return templates.TemplateResponse("index.html", {"request": request, "user": user})
 
 
