@@ -10,13 +10,13 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="/static/style.css">
     <script src="/static/fouc.js"></script>
 </head>
 
 <body>
-    <nav>
-        <a class="brand" href="/landing"><i class="fas fa-brain"></i> Wasla Master</a>
+    <nav class="navbar">
+        <a class="navbar-brand" href="/landing"><i class="fas fa-brain"></i> Wasla Master</a>
         <div style="display:flex; gap:1rem; align-items:center;">
             <button id="themeToggleBtn" title="Toggle Theme"
                 style="border:none; cursor:pointer; background:transparent; font-size:1.1rem; color:var(--txt-m); transition:color 0.2s;"
@@ -26,7 +26,7 @@
             <a class="nav-pill" href="/login"><i class="fas fa-sign-in-alt"></i> &nbsp;Sign In</a>
         </div>
     </nav>
-    <main>
+    <main class="auth-main">
         <div class="auth-card">
             <div class="auth-logo">
                 <div class="auth-logo-icon"><i class="fas fa-brain"></i></div>
@@ -87,7 +87,7 @@
     </main>
     <footer>© 2026 Wasla Edu — Crimson Hearth Theme</footer>
 
-    <script src="../static/main.js"></script>
+    <script src="/static/main.js"></script>
 </body>
 
 </html>

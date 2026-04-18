@@ -165,7 +165,7 @@ body::after {
 
 .navbar-brand {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     font-weight: 800;
     background: var(--grad-w);
     -webkit-background-clip: text;
@@ -180,7 +180,7 @@ body::after {
 .navbar-brand i {
     -webkit-text-fill-color: initial;
     color: var(--secondary);
-    filter: drop-shadow(0 0 8px var(--primary));
+    filter: drop-shadow(0 0 8px rgba(139, 0, 0, 0.6));
 }
 
 .navbar-tagline {
@@ -757,67 +757,17 @@ body::after {
 }
 
 /* ── Generated DOCUMENT XML blocks ───────────────────────── */
-document {
-    display: block;
-    background: rgba(139, 0, 0, 0.05);
-    border-left: 4px solid var(--secondary);
-    padding: 1.5rem;
-    margin: 1.25rem 0;
-    border-radius: 0 var(--r-md) var(--r-md) 0;
-    box-shadow: 0 4px 20px rgba(139, 0, 0, 0.12);
+/* ── Auth Layout ──────────────────────────────────────────── */
+.auth-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    overflow-y: auto;
+    min-height: 0;
     position: relative;
-}
-
-document::before {
-    content: '📄 GENERATED DOCUMENT';
-    display: block;
-    font-size: 0.70rem;
-    font-weight: 700;
-    color: var(--secondary);
-    letter-spacing: 1.5px;
-    margin-bottom: 1rem;
-    text-transform: uppercase;
-}
-
-document title {
-    display: block;
-    font-size: 1.55rem;
-    font-weight: 700;
-    color: var(--txt-1);
-    border-bottom: 1px solid var(--brd-s);
-    padding-bottom: 0.5rem;
-    margin-bottom: 0.4rem;
-}
-
-document subtitle {
-    display: block;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--tertiary);
-    margin-bottom: 1.2rem;
-}
-
-document introduction,
-document benefits,
-document conclusion,
-document section {
-    display: block;
-    margin-top: 1rem;
-    padding: 1.15rem;
-    background: rgba(14, 14, 14, 0.3);
-    border-radius: var(--r-sm);
-    border: 1px solid var(--brd);
-}
-
-document para {
-    display: block;
-    margin-bottom: 0.9rem;
-    line-height: 1.72;
-    color: var(--txt-var);
-}
-
-document para:last-child {
-    margin-bottom: 0;
+    z-index: 1;
 }
 
 /* ── Responsive ───────────────────────────────────────────── */
@@ -1084,38 +1034,30 @@ label.lbl {
     left: 0;
     right: 0;
     z-index: 100;
-    background: rgba(14, 14, 14, .78);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-bottom: 1px solid var(--brd);
     padding: 0.85rem 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 }
 
-[data-theme="light"] .lp-nav {
-    background: rgba(255, 255, 255, 0.82);
-}
-
-.lp-brand {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.3rem;
-    font-weight: 800;
-    background: var(--grad-w);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: flex;
+/* ── Nav Pill ───────────────────────────────────────────── */
+.nav-pill {
+    display: inline-flex;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0.5rem;
+    padding: 0.45rem 1.1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--brd);
+    border-radius: 50px;
+    color: var(--txt-1);
+    font-size: 0.88rem;
+    font-weight: 600;
     text-decoration: none;
+    transition: all var(--ease);
 }
 
-.lp-brand i {
-    -webkit-text-fill-color: initial;
-    color: var(--secondary);
-    filter: drop-shadow(0 0 8px rgba(139, 0, 0, .6));
+.nav-pill:hover {
+    background: rgba(139, 0, 0, 0.15);
+    border-color: var(--secondary);
+    color: var(--tertiary);
+    transform: translateY(-1px);
 }
 
 .lp-nav-links {
