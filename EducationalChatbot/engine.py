@@ -78,12 +78,20 @@ class IRYMManager:
         else:
             print("[!] No educational data found to ingest.")
 
-    async def get_response(self, query: str, session_id: str = "default_user", image_path: str = None):
+    async def get_response(self, query: str, session_id: str = "default_user", image_path: str = None, role: str = "user"):
         """Queries the RAG pipeline or VLM for a response."""
         import traceback
         
         if not self.rag:
             raise RuntimeError("IRYM Manager not initialized. Call initialize() first.")
+            
+        role_instruction = (
+            "You are an educational assistant for a student. Help them understand, answer questions, and memorize the material. "
+            if role == "user" else 
+            "You are a teaching assistant for a tutor/teacher. Help them plan lessons, create questions, and organize course material based on the provided knowledge. "
+        )
+        
+        refined_query = f"{role_instruction}\nUser Query: {query}"
         
         # If an image is provided, use the VLM pipeline
         if image_path:
@@ -91,7 +99,7 @@ class IRYMManager:
                 if not self.vlm:
                     self.vlm = get_vlm_pipeline()
                 print(f"[*] Using VLM for query: {query} with image: {image_path}")
-                return await self.vlm.ask(prompt=query, image_path=image_path, use_rag=True)
+                return await self.vlm.ask(prompt=refined_query, image_path=image_path, use_rag=True)
             except Exception as e:
                 print(f"[!] VLM Error: {e}")
                 traceback.print_exc()
@@ -99,7 +107,7 @@ class IRYMManager:
 
         try:
             # Try RAG first for course-specific knowledge
-            response = await self.rag.query(query)
+            response = await self.rag.query(refined_query, session_id=session_id)
             return response
         except Exception as e:
             print(f"[!] RAG query failed: {e}. Falling back to general LLM.")
@@ -107,7 +115,7 @@ class IRYMManager:
             # Fallback to general LLM if RAG fails (e.g. no documents matches)
             if not self.llm:
                  self.llm = container.get("llm")
-            return await self.llm.generate(query, session_id=session_id)
+            return await self.llm.generate(refined_query, session_id=session_id)
 
     async def shutdown(self):
         """Cleans up IRYM resources."""

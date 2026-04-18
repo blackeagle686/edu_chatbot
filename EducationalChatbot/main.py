@@ -21,6 +21,7 @@ async def startup_event():
     
     # Ensure uploads directory exists
     os.makedirs(os.path.join(BASE_DIR, "uploads"), exist_ok=True)
+    os.makedirs(os.path.join(BASE_DIR, "uploads", "docs"), exist_ok=True)
     
     # Initialize IRYM SDK
     data_dir = os.path.join(BASE_DIR, "data")
@@ -45,6 +46,7 @@ async def index(request: Request):
 async def chat(
     message: str = Form(...), 
     session_id: str = Form("default_user"),
+    role: str = Form("user"),
     image: UploadFile = File(None)
 ):
     try:
@@ -58,13 +60,33 @@ async def chat(
             with open(image_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
         
-        response = await irym_manager.get_response(message, session_id=session_id, image_path=image_path)
+        response = await irym_manager.get_response(message, session_id=session_id, image_path=image_path, role=role)
         return JSONResponse({"response": response})
     except Exception as e:
         import traceback
         print(f"[!] Critical Route Error: {e}")
         traceback.print_exc()
         return JSONResponse({"error": f"Server Error: {str(e)}"}, status_code=500)
+
+@app.post("/upload_doc")
+async def upload_doc(file: UploadFile = File(...)):
+    try:
+        # Create a unique filename for the document
+        ext = os.path.splitext(file.filename)[1]
+        filename = f"{uuid.uuid4()}{ext}"
+        doc_path = os.path.join(BASE_DIR, "uploads", "docs", filename)
+        
+        with open(doc_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        print(f"[*] Uploaded document for RAG ingestion: {doc_path}")
+        await irym_manager.rag.ingest(doc_path)
+        return JSONResponse({"status": "success", "message": "Document ingested successfully"})
+    except Exception as e:
+        import traceback
+        print(f"[!] Document Upload Error: {e}")
+        traceback.print_exc()
+        return JSONResponse({"error": f"Upload Error: {str(e)}"}, status_code=500)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
