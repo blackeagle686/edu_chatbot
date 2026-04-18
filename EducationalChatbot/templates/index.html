@@ -23,7 +23,7 @@
     <script src="/static/fouc.js"></script>
 </head>
 
-<body data-user-role='{{ "helper" if user and user.role == "helper" else "user" }}'>
+<body class="fixed-layout" data-user-role='{{ "helper" if user and user.role == "helper" else "user" }}'>
 
     <!-- ── Navbar ── -->
     <nav class="navbar">
