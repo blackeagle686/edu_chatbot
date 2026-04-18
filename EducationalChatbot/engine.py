@@ -95,7 +95,7 @@ class IRYMManager:
             "If asked to create a working plan, summary, or document to download, "
             "wrap the complete content of that document entirely within XML-like tags: "
             "<DOCUMENT filename=\"example.md\">...content...</DOCUMENT>. "
-            "Make sure the filename ends with .md and use markdown formatting inside."
+            "Make sure the filename ends with .md and strictly use standard markdown formatting inside. DO NOT use interior XML tags like <title> or <section>. Keep it concise so it doesn't get cut off."
         )
         
         refined_query = f"{role_instruction}\nUser Query: {query}"
@@ -150,7 +150,7 @@ class IRYMManager:
         import re
         import uuid
         
-        doc_pattern = r'<DOCUMENT\s+filename="([^"]+)">([\s\S]*?)</DOCUMENT>'
+        doc_pattern = r'<DOCUMENT\s+filename="([^"]+)">([\s\S]*?)(?:</DOCUMENT>|$)'
         matches = list(re.finditer(doc_pattern, response_text))
         
         new_response = response_text
