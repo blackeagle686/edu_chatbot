@@ -45,23 +45,7 @@
         </div>
     </nav>
 
-    <!-- Helper Toolbar -->
-    <div id="helper-toolbar" class="d-none"
-        style="background: rgba(0, 0, 0, 0.3); border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 20px;">
-        <div class="container-fluid p-0 d-flex justify-content-between align-items-center flex-wrap gap-2 text-light"
-            style="font-size: 0.9em;">
-            <span><i class="fas fa-chalkboard-teacher me-2 text-warning"></i><strong>Helper Workspace:</strong> Upload
-                educational documents to expand the assistant's knowledge base.</span>
-            <form id="doc-upload-form" class="d-flex align-items-center mb-0 m-0">
-                <input type="file" id="doc-input"
-                    class="form-control form-control-sm me-2 bg-dark text-light border-secondary"
-                    accept=".pdf,.txt,.md,.docx,.csv" required style="max-width: 250px;">
-                <button type="submit" class="btn btn-sm btn-outline-warning" id="doc-upload-btn">
-                    <i class="fas fa-upload me-1"></i> Upload
-                </button>
-            </form>
-        </div>
-    </div>
+
 
     <!-- ───────────── Chat Container ───────────── -->
     <div class="chat-container">
@@ -112,7 +96,13 @@
                     <input type="file" id="image-input" accept="image/*" style="display:none;">
                     <button type="button" class="upload-btn" id="upload-btn"
                         onclick="document.getElementById('image-input').click()" title="Attach image">
-                        <i class="fas fa-paperclip"></i>
+                        <i class="fas fa-image"></i>
+                    </button>
+                    <!-- Document upload button -->
+                    <input type="file" id="doc-input" accept=".pdf,.txt,.md,.docx,.csv" style="display:none;">
+                    <button type="button" class="upload-btn" id="doc-upload-trigger"
+                        onclick="document.getElementById('doc-input').click()" title="Upload document for RAG">
+                        <i class="fas fa-file-alt"></i>
                     </button>
                     <input type="text" id="user-input" class="form-control"
                         placeholder="Ask a question or describe an image…" autocomplete="off">
@@ -172,53 +162,60 @@
         /* ── Role toggle ── */
         const roleSwitch = document.getElementById('role-switch');
         const roleLabel = document.getElementById('role-label');
-        const helperToolbar = document.getElementById('helper-toolbar');
-        
+
         roleSwitch.addEventListener('change', (e) => {
             if (e.target.checked) {
                 roleLabel.textContent = 'Helper Mode';
-                helperToolbar.classList.remove('d-none');
             } else {
                 roleLabel.textContent = 'Learner Mode';
-                helperToolbar.classList.add('d-none');
             }
         });
 
         /* ── Document upload ── */
-        const docUploadForm = document.getElementById('doc-upload-form');
         const docInput = document.getElementById('doc-input');
-        const docUploadBtn = document.getElementById('doc-upload-btn');
-        
-        docUploadForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const file = docInput.files[0];
+        const docUploadTrigger = document.getElementById('doc-upload-trigger');
+
+        docInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
             if (!file) return;
-            
-            docUploadBtn.disabled = true;
-            docUploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-            
+
+            docUploadTrigger.disabled = true;
+            docUploadTrigger.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
             try {
                 const formData = new FormData();
                 formData.append('file', file);
-                
+
                 const response = await fetch('/upload_doc', {
                     method: 'POST',
                     body: formData
                 });
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
-                    alert('Document uploaded and ingested successfully!');
-                    docInput.value = '';
+                    if (typeof appendMessage === 'function') {
+                        appendMessage(`✅ Document **${file.name}** uploaded and ingested successfully!`, 'bot');
+                    } else {
+                        alert('Document uploaded and ingested successfully!');
+                    }
                 } else {
-                    alert('Error: ' + (data.error || 'Upload failed'));
+                    if (typeof appendMessage === 'function') {
+                        appendMessage(`❌ Error uploading document: ${data.error || 'Upload failed'}`, 'bot');
+                    } else {
+                        alert('Error: ' + (data.error || 'Upload failed'));
+                    }
                 }
             } catch (err) {
-                alert('Connection error during upload.');
+                if (typeof appendMessage === 'function') {
+                    appendMessage(`❌ Connection error during document upload.`, 'bot');
+                } else {
+                    alert('Connection error during upload.');
+                }
                 console.error(err);
             } finally {
-                docUploadBtn.disabled = false;
-                docUploadBtn.innerHTML = '<i class="fas fa-upload me-1"></i> Upload';
+                docUploadTrigger.disabled = false;
+                docUploadTrigger.innerHTML = '<i class="fas fa-file-alt"></i>';
+                docInput.value = '';
             }
         });
 
