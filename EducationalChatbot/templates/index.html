@@ -20,6 +20,71 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* Styling for AI-generated XML Document blocks */
+        document {
+            display: block;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid var(--bs-warning);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-family: 'Inter', sans-serif;
+            position: relative;
+        }
+
+        document::before {
+            content: '📄 GENERATED DOCUMENT';
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--bs-warning);
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        document title {
+            display: block;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        document subtitle {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--bs-info);
+            margin-bottom: 1.5rem;
+        }
+
+        document introduction,
+        document benefits,
+        document conclusion,
+        document section {
+            display: block;
+            margin-top: 1rem;
+            padding: 1.25rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        document para {
+            display: block;
+            margin-bottom: 1rem;
+            line-height: 1.7;
+            color: #e0e0e0;
+        }
+
+        document para:last-child {
+            margin-bottom: 0;
+        }
+    </style>
 </head>
 
 <body>
