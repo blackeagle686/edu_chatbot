@@ -91,6 +91,13 @@ class IRYMManager:
             "You are a teaching assistant for a tutor/teacher. Help them plan lessons, create questions, and organize course material based on the provided knowledge. "
         )
         
+        role_instruction += (
+            "If asked to create a working plan, summary, or document to download, "
+            "wrap the complete content of that document entirely within XML-like tags: "
+            "<DOCUMENT filename=\"example.md\">...content...</DOCUMENT>. "
+            "Make sure the filename ends with .md and use markdown formatting inside."
+        )
+        
         refined_query = f"{role_instruction}\nUser Query: {query}"
         
         # If an image is provided, use the VLM pipeline
@@ -99,7 +106,8 @@ class IRYMManager:
                 if not self.vlm:
                     self.vlm = get_vlm_pipeline()
                 print(f"[*] Using VLM for query: {query} with image: {image_path}")
-                return await self.vlm.ask(prompt=refined_query, image_path=image_path, use_rag=True)
+                result = await self.vlm.ask(prompt=refined_query, image_path=image_path, use_rag=True)
+                return await self._process_document_generation(result)
             except Exception as e:
                 print(f"[!] VLM Error: {e}")
                 traceback.print_exc()
@@ -119,19 +127,68 @@ class IRYMManager:
             print("[*] Query identified as casual conversation. Bypassing RAG.")
             if not self.llm:
                  self.llm = container.get("llm")
-            return await self.llm.generate(refined_query, session_id=session_id)
+            result = await self.llm.generate(refined_query, session_id=session_id)
+            return await self._process_document_generation(result)
 
         try:
             # Try RAG first for course-specific knowledge
-            response = await self.rag.query(refined_query, session_id=session_id)
-            return response
+            result = await self.rag.query(refined_query, session_id=session_id)
+            return await self._process_document_generation(result)
         except Exception as e:
             print(f"[!] RAG query failed: {e}. Falling back to general LLM.")
             traceback.print_exc()
             # Fallback to general LLM if RAG fails (e.g. no documents matches)
             if not self.llm:
                  self.llm = container.get("llm")
-            return await self.llm.generate(refined_query, session_id=session_id)
+            result = await self.llm.generate(refined_query, session_id=session_id)
+            return await self._process_document_generation(result)
+            
+    async def _process_document_generation(self, response_text: str):
+        if not isinstance(response_text, str):
+            return response_text, []
+            
+        import re
+        import uuid
+        
+        doc_pattern = r'<DOCUMENT\s+filename="([^"]+)">([\s\S]*?)</DOCUMENT>'
+        matches = list(re.finditer(doc_pattern, response_text))
+        
+        new_response = response_text
+        generated_docs = []
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        doc_dir = os.path.join(base_dir, "uploads", "docs")
+        os.makedirs(doc_dir, exist_ok=True)
+        
+        for match in matches:
+            filename = match.group(1).strip()
+            content = match.group(2).strip()
+            
+            safe_filename = filename.replace("/", "").replace("\\", "").replace(" ", "_")
+            if not safe_filename.endswith(".md") and not safe_filename.endswith(".txt"):
+                safe_filename += ".md"
+                
+            unique_name = f"{uuid.uuid4().hex[:8]}_{safe_filename}"
+            doc_path = os.path.join(doc_dir, unique_name)
+            
+            with open(doc_path, "w", encoding="utf-8") as f:
+                f.write(content)
+                
+            print(f"[*] Auto-ingesting generated document: {doc_path}")
+            if self.rag:
+                try:
+                    await self.rag.ingest(doc_path)
+                except Exception as e:
+                    print(f"[!] Failed to ingest spawned document: {e}")
+            
+            download_link = f"\n\n*(Document successfully saved)*\n📄 **Generated:** [{safe_filename}](/download/{unique_name})\n\n"
+            new_response = new_response.replace(match.group(0), download_link)
+            
+            generated_docs.append({
+                "name": safe_filename,
+                "url": f"/download/{unique_name}"
+            })
+            
+        return new_response, generated_docs
 
     async def shutdown(self):
         """Cleans up IRYM resources."""

@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request, Form, File, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from engine import irym_manager
@@ -60,8 +60,8 @@ async def chat(
             with open(image_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
         
-        response = await irym_manager.get_response(message, session_id=session_id, image_path=image_path, role=role)
-        return JSONResponse({"response": response})
+        response, docs = await irym_manager.get_response(message, session_id=session_id, image_path=image_path, role=role)
+        return JSONResponse({"response": response, "generated_docs": docs})
     except Exception as e:
         import traceback
         print(f"[!] Critical Route Error: {e}")
@@ -87,6 +87,16 @@ async def upload_doc(file: UploadFile = File(...)):
         print(f"[!] Document Upload Error: {e}")
         traceback.print_exc()
         return JSONResponse({"error": f"Upload Error: {str(e)}"}, status_code=500)
+
+@app.get("/download/{filename}")
+async def download_doc(filename: str):
+    doc_path = os.path.join(BASE_DIR, "uploads", "docs", filename)
+    if not os.path.exists(doc_path):
+        return JSONResponse({"error": "File not found"}, status_code=404)
+        
+    # Restore the user-friendly original name for download
+    original_name = filename.split("_", 1)[-1] if "_" in filename else filename
+    return FileResponse(path=doc_path, filename=original_name, media_type='application/octet-stream')
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
