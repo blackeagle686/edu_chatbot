@@ -110,88 +110,87 @@
         </div>
     </nav>
 
-
-
-    <div class="d-flex w-100" style="height: calc(100vh - 60px);">
+    <div class="main-flex">
         <!-- ───────────── Chat Container ───────────── -->
-        <div class="chat-container flex-grow-1" style="height: 100%;">
-
-            <!-- Chat Header -->
-            <div class="chat-header">
-                <div class="bot-avatar-lg">
-                    <i class="fas fa-robot"></i>
+        <div class="chat-container">
+            <div class="chat-card">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="bot-avatar-lg">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="chat-header-info">
+                        <h6>IRYM Educational Assistant</h6>
+                        <small>Ask me anything · Vision-enabled · RAG-powered</small>
+                    </div>
                 </div>
-                <div class="chat-header-info">
-                    <h6>IRYM Educational Assistant</h6>
-                    <small>Ask me anything · Vision-enabled · RAG-powered</small>
-                </div>
-            </div>
 
-            <!-- Messages -->
-            <div class="chat-messages" id="chat-messages">
+                <!-- Messages -->
+                <div class="chat-messages" id="chat-messages">
 
-                <div class="chat-divider"><span>Today</span></div>
+                    <div class="chat-divider"><span>Today</span></div>
 
-                <!-- Welcome message -->
-                <div class="message-row">
-                    <div class="msg-avatar bot-av"><i class="fas fa-robot"></i></div>
-                    <div>
-                        <div class="message bot welcome">
-                            👋 Hello! I'm your <strong>IRYM Educational Assistant</strong>.<br>
-                            Ask me anything about your courses, or upload an image for AI-powered visual analysis!
-                            <span class="msg-time" id="welcome-time"></span>
+                    <!-- Welcome message -->
+                    <div class="message-row">
+                        <div class="msg-avatar bot-av"><i class="fas fa-robot"></i></div>
+                        <div>
+                            <div class="message bot welcome">
+                                👋 Hello! I'm your <strong>IRYM Educational Assistant</strong>.<br>
+                                Ask me anything about your courses, or upload an image for AI-powered visual analysis!
+                                <span class="msg-time" id="welcome-time"></span>
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
-            </div>
+                <!-- ── Image Preview Strip ── -->
+                <div id="image-preview-container">
+                    <img id="image-preview" class="preview-image" src="" alt="Preview">
+                    <span class="preview-label"><i class="fas fa-image me-1"></i>Image ready to send</span>
+                    <button type="button" class="remove-image" id="remove-image-btn" title="Remove image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
 
-            <!-- ── Image Preview Strip ── -->
-            <div id="image-preview-container">
-                <img id="image-preview" class="preview-image" src="" alt="Preview">
-                <span class="preview-label"><i class="fas fa-image me-1"></i>Image ready to send</span>
-                <button type="button" class="remove-image" id="remove-image-btn" title="Remove image">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
+                <!-- ── Input ── -->
+                <div class="chat-input-area">
+                    <form id="chat-form">
+                        <div class="input-group">
+                            <input type="file" id="image-input" accept="image/*" style="display:none;">
+                            <button type="button" class="upload-btn" id="upload-btn"
+                                onclick="document.getElementById('image-input').click()" title="Attach image">
+                                <i class="fas fa-image"></i>
+                            </button>
+                            <!-- Document upload button -->
+                            <input type="file" id="doc-input" accept=".pdf,.txt,.md,.docx,.csv" style="display:none;">
+                            <button type="button" class="upload-btn" id="doc-upload-trigger"
+                                onclick="document.getElementById('doc-input').click()" title="Upload document for RAG">
+                                <i class="fas fa-file-alt"></i>
+                            </button>
+                            <input type="text" id="user-input" class="form-control"
+                                placeholder="Ask a question or describe an image…" autocomplete="off">
+                            <button class="btn-send" type="submit" id="send-btn" title="Send">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
-            <!-- ── Input ── -->
-            <div class="chat-input-area">
-                <form id="chat-form">
-                    <div class="input-group">
-                        <input type="file" id="image-input" accept="image/*" style="display:none;">
-                        <button type="button" class="upload-btn" id="upload-btn"
-                            onclick="document.getElementById('image-input').click()" title="Attach image">
-                            <i class="fas fa-image"></i>
-                        </button>
-                        <!-- Document upload button -->
-                        <input type="file" id="doc-input" accept=".pdf,.txt,.md,.docx,.csv" style="display:none;">
-                        <button type="button" class="upload-btn" id="doc-upload-trigger"
-                            onclick="document.getElementById('doc-input').click()" title="Upload document for RAG">
-                            <i class="fas fa-file-alt"></i>
-                        </button>
-                        <input type="text" id="user-input" class="form-control"
-                            placeholder="Ask a question or describe an image…" autocomplete="off">
-                        <button class="btn-send" type="submit" id="send-btn" title="Send">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
+            </div><!-- /.chat-card -->
         </div><!-- /.chat-container -->
 
         <!-- ───────────── Generated Documents Panel ───────────── -->
-        <div id="docs-panel" class="bg-dark border-start border-secondary p-3 d-none flex-column"
-            style="width: 260px; height: 100%; overflow-y: auto;">
-            <h6 class="text-light border-bottom border-secondary pb-2 mb-3"><i
-                    class="fas fa-folder-open me-2 text-warning"></i>Session Documents</h6>
+        <div id="docs-panel" class="d-none flex-column p-3">
+            <h6 class="border-bottom border-secondary pb-2 mb-3">
+                <i class="fas fa-folder-open me-2"></i>Session Documents
+            </h6>
             <div id="generated-docs-list" class="d-flex flex-column gap-2">
                 <!-- Document links will be injected here -->
             </div>
         </div>
 
-    </div><!-- /.d-flex -->
+    </div><!-- /.main-flex -->
 
     <!-- Document Preview Modal -->
     <div class="modal fade" id="docPreviewModal" tabindex="-1" aria-labelledby="docPreviewModalLabel"
