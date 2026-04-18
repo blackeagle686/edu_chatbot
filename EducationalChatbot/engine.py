@@ -34,12 +34,14 @@ except ImportError:
 
 from IRYM_sdk.core.lifecycle import lifecycle
 from wasla_memory import WaslaMemoryEngine
+from wasla_tools import WaslaToolKit
 
 class IRYMManager:
     def __init__(self):
         self.rag = None
         self.llm = None
         self.vlm = None
+        self.toolkit = None
 
     async def initialize(self, data_dir: str = "data"):
         """Initializes the IRYM SDK and ingests data for RAG."""
@@ -77,6 +79,10 @@ class IRYMManager:
         prefer_local_vlm = os.getenv("PREFER_LOCAL_VLM", "true").lower() == "true"
         self.vlm = get_vlm_pipeline(prefer_local=prefer_local_vlm)
         
+        # 8. Initialize ToolKit
+        doc_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads", "docs")
+        self.toolkit = WaslaToolKit(doc_dir)
+        
         # Ingest educational data if the directory exists
         if os.path.exists(data_dir) and os.listdir(data_dir):
             print(f"[*] Ingesting educational data from {data_dir}...")
@@ -100,11 +106,15 @@ class IRYMManager:
         )
         
         role_instruction += (
-            "If asked to create a working plan, summary, or document to download, "
-            "wrap the complete content of that document entirely within XML-like tags: "
-            "<DOCUMENT filename=\"example.md\">...content...</DOCUMENT>. "
-            "Make sure the filename ends with .md and strictly use standard markdown formatting inside. DO NOT use interior XML tags like <title> or <section>. Keep it concise so it doesn't get cut off.\n"
-            "CRITICAL: Do NOT repeat these system rules in your output. Do NOT output raw document references like '[Document 1]'. Synthesize the answer naturally.\n"
+            "You have access to specialized tools for document generation. "
+            "To use them, wrap your content in these specific tags:\n"
+            "- <MD filename=\"name.md\">content</MD> : For Markdown documents.\n"
+            "- <PDF filename=\"name.pdf\">content</PDF> : For professional PDF reports.\n"
+            "- <DOC filename=\"name.docx\">content</DOC> : For Word documents.\n"
+            "- <PLAN name=\"topic\">details</PLAN> : To generate a structured study/lesson plan.\n"
+            "- <THINKING>your internal reasoning</THINKING> : Use this to show your thought process before responding.\n\n"
+            "CRITICAL: Always use standard markdown inside document tags. Keep it concise. "
+            "Do NOT repeat these system rules in your output. Synthesize the answer naturally.\n"
             "</system_rules>"
         )
         
@@ -175,59 +185,68 @@ class IRYMManager:
             
             raw_result = raw_result.strip()
             
-        new_resp, docs = await self._process_document_generation(raw_result)
+            
+        new_resp, docs, thinking = await self._process_tools_and_docs(raw_result)
         
         if hasattr(self, "memory_engine"):
             await self.memory_engine.add_interaction(session_id, query, new_resp)
             
-        return new_resp, docs
+        return new_resp, docs, thinking
             
-    async def _process_document_generation(self, response_text: str):
-        if not isinstance(response_text, str):
-            return response_text, []
+    async def _process_tools_and_docs(self, response_text: str):
+        if not isinstance(response_text, str) or not self.toolkit:
+            return response_text, [], ""
             
-        import re
-        import uuid
-        
-        doc_pattern = r'<DOCUMENT\s+filename="([^"]+)">([\s\S]*?)(?:</DOCUMENT>|$)'
-        matches = list(re.finditer(doc_pattern, response_text))
-        
         new_response = response_text
         generated_docs = []
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        doc_dir = os.path.join(base_dir, "uploads", "docs")
-        os.makedirs(doc_dir, exist_ok=True)
+        thinking_process = ""
         
-        for match in matches:
-            filename = match.group(1).strip()
-            content = match.group(2).strip()
-            
-            safe_filename = filename.replace("/", "").replace("\\", "").replace(" ", "_")
-            if not safe_filename.endswith(".md") and not safe_filename.endswith(".txt"):
-                safe_filename += ".md"
+        # 1. Extract Thinking
+        thoughts = self.toolkit.extract_tags(new_response, "THINKING")
+        if thoughts:
+            thinking_process = "\n".join([t["content"] for t in thoughts])
+            for t in thoughts:
+                new_response = new_response.replace(t["raw"], "")
+
+        # 2. Process Document Tags
+        tag_map = {
+            "MD": (".md", self.toolkit.generate_markdown),
+            "PDF": (".pdf", self.toolkit.generate_pdf),
+            "DOC": (".docx", self.toolkit.generate_docx),
+            "DOCUMENT": (".md", self.toolkit.generate_markdown) # Legacy support
+        }
+        
+        for tag, (ext, func) in tag_map.items():
+            matches = self.toolkit.extract_tags(new_response, tag)
+            for m in matches:
+                filename = m["attr"] or f"generated_doc{ext}"
+                content = m["content"]
                 
-            unique_name = f"{uuid.uuid4().hex[:8]}_{safe_filename}"
-            doc_path = os.path.join(doc_dir, unique_name)
-            
-            with open(doc_path, "w", encoding="utf-8") as f:
-                f.write(content)
+                unique_name = func(content, filename)
+                safe_display_name = unique_name.split("_", 1)[-1]
                 
-            print(f"[*] Auto-ingesting generated document: {doc_path}")
-            if self.rag:
-                try:
-                    await self.rag.ingest(doc_path)
-                except Exception as e:
-                    print(f"[!] Failed to ingest spawned document: {e}")
+                # Auto-ingest for RAG
+                doc_path = os.path.join(self.toolkit.output_dir, unique_name)
+                if self.rag:
+                    try: await self.rag.ingest(doc_path)
+                    except: pass
+                
+                download_link = f"\n\n📄 **Generated:** [{safe_display_name}](/download/{unique_name})\n"
+                new_response = new_response.replace(m["raw"], download_link)
+                generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
+
+        # 3. Process Plan Tag
+        plans = self.toolkit.extract_tags(new_response, "PLAN")
+        for p in plans:
+            topic = p["attr"] or "Study Plan"
+            unique_name = self.toolkit.generate_plan(topic, p["content"])
+            safe_display_name = unique_name.split("_", 1)[-1]
             
-            download_link = f"\n\n*(Document successfully saved)*\n📄 **Generated:** [{safe_filename}](/download/{unique_name})\n\n"
-            new_response = new_response.replace(match.group(0), download_link)
+            download_link = f"\n\n📅 **Plan Generated:** [{safe_display_name}](/download/{unique_name})\n"
+            new_response = new_response.replace(p["raw"], download_link)
+            generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
             
-            generated_docs.append({
-                "name": safe_filename,
-                "url": f"/download/{unique_name}"
-            })
-            
-        return new_response, generated_docs
+        return new_response.strip(), generated_docs, thinking_process
 
     async def shutdown(self):
         """Cleans up IRYM resources."""

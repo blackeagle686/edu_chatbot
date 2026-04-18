@@ -147,10 +147,10 @@ async def chat(
             with open(image_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
 
-        response, docs = await irym_manager.get_response(
+        response, docs, thinking = await irym_manager.get_response(
             message, session_id=session_id, image_path=image_path, role=role
         )
-        return JSONResponse({"response": response, "generated_docs": docs})
+        return JSONResponse({"response": response, "generated_docs": docs, "thinking": thinking})
     except Exception as e:
         import traceback
         print(f"[!] Critical Route Error: {e}")

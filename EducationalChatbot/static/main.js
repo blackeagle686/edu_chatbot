@@ -130,7 +130,7 @@
     }
 
     /* ── Chat Functionality ── */
-    function appendMessage(text, sender, imageUrl = null) {
+    function appendMessage(text, sender, imageUrl = null, thinking = null) {
         if (!chatMessages) return;
 
         const row = document.createElement('div');
@@ -152,6 +152,14 @@
             img.src = imageUrl;
             img.classList.add('chat-img');
             bubble.appendChild(img);
+        }
+
+        if (thinking && sender === 'bot') {
+            const thinkDiv = document.createElement('div');
+            thinkDiv.classList.add('thought-process');
+            thinkDiv.style.display = 'block';
+            thinkDiv.innerHTML = renderMarkdown(thinking);
+            bubble.appendChild(thinkDiv);
         }
 
         const content = document.createElement('div');
@@ -242,7 +250,7 @@
 
             const reply = data.response
                 || ('Sorry, I encountered an error: ' + (data.error || 'Unknown error'));
-            appendMessage(reply, 'bot');
+            appendMessage(reply, 'bot', null, data.thinking);
 
             if (data.generated_docs && data.generated_docs.length > 0) {
                 const docsPanel = document.getElementById('docs-panel');

@@ -1640,3 +1640,33 @@ footer .social-link:hover {
         font-size: 1.2rem !important;
     }
 }
+
+/* ── Thought Process Block ────────────────────────────────── */
+.thought-process {
+    background: rgba(139, 0, 0, 0.05);
+    border-left: 3px solid var(--secondary);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: 4px 12px 12px 4px;
+    font-size: 0.88rem;
+    color: var(--txt-m);
+    font-style: italic;
+    line-height: 1.6;
+    display: none; /* Hidden by default, shown when content exists */
+}
+
+.thought-process::before {
+    content: '💭 Thought Process:';
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+[data-theme="light"] .thought-process {
+    background: rgba(139, 0, 0, 0.03);
+}
