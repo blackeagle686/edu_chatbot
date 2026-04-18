@@ -95,14 +95,14 @@
             <i class="fas fa-brain"></i> Wasla Master
         </a>
         <div class="d-flex align-items-center gap-4">
-            <!-- Role Toggle -->
-            <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
-                <input class="form-check-input" type="checkbox" id="role-switch" {% if user and user.role=='helper'
-                    %}checked{% endif %} style="cursor:pointer; width:36px; height:18px;">
-                <label class="form-check-label text-light fw-semibold m-0" for="role-switch" id="role-label"
-                    style="cursor:pointer; font-size:0.85rem; letter-spacing:0.03em;">
+            <!-- Role Badge -->
+            <div class="d-flex align-items-center bg-dark bg-opacity-25 border border-secondary border-opacity-25 rounded-pill px-3 py-1"
+                style="height:32px;">
+                <i class="{% if user and user.role == 'helper' %}fas fa-chalkboard-teacher{% else %}fas fa-graduation-cap{% endif %} me-2"
+                    style="color:var(--tertiary); font-size:0.85rem;"></i>
+                <span class="text-light fw-semibold m-0" style="font-size:0.85rem; letter-spacing:0.03em;">
                     {{ 'Helper Mode' if user and user.role == 'helper' else 'Learner Mode' }}
-                </label>
+                </span>
             </div>
 
             <!-- Status Pill -->
@@ -300,17 +300,8 @@
             reader.readAsDataURL(file);
         });
 
-        /* ── Role toggle ── */
-        const roleSwitch = document.getElementById('role-switch');
-        const roleLabel = document.getElementById('role-label');
-
-        roleSwitch.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                roleLabel.textContent = 'Helper Mode';
-            } else {
-                roleLabel.textContent = 'Learner Mode';
-            }
-        });
+        /* ── Role static binding ── */
+        const userRole = '{{ "helper" if user and user.role == "helper" else "user" }}';
 
         /* ── Document upload ── */
         const docInput = document.getElementById('doc-input');
@@ -461,7 +452,7 @@
             try {
                 const formData = new FormData();
                 formData.append('message', prompt);
-                formData.append('role', roleSwitch.checked ? 'helper' : 'user');
+                formData.append('role', userRole);
                 if (currentImage) {
                     formData.append('image', currentImage);
                 }
