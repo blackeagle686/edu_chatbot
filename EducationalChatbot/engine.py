@@ -33,6 +33,7 @@ except ImportError:
     from IRYM_sdk.core.config import config
 
 from IRYM_sdk.core.lifecycle import lifecycle
+from wasla_memory import WaslaMemoryEngine
 
 class IRYMManager:
     def __init__(self):
@@ -64,8 +65,13 @@ class IRYMManager:
         await startup_irym()
         await lifecycle.startup()
 
-        # 6. Build Pipelines
+        # 6. Build Pipelines & Services
         self.rag = get_rag_pipeline()
+        self.llm = container.get("llm")
+        
+        # 7. Initialize Wasla Semantic Memory Engine
+        vector_db = getattr(self.rag, "vector_db", container.get("vector_db")) if self.rag else None
+        self.memory_engine = WaslaMemoryEngine(self.llm, vector_db)
         
         # Respect user preference: default to Local as requested
         prefer_local_vlm = os.getenv("PREFER_LOCAL_VLM", "true").lower() == "true"
@@ -98,7 +104,18 @@ class IRYMManager:
             "Make sure the filename ends with .md and strictly use standard markdown formatting inside. DO NOT use interior XML tags like <title> or <section>. Keep it concise so it doesn't get cut off."
         )
         
-        refined_query = f"{role_instruction}\nUser Query: {query}"
+        
+        memory_context = ""
+        if hasattr(self, "memory_engine"):
+            memory_context = await self.memory_engine.get_context(session_id, query)
+            if memory_context.startswith("[CACHED_RESPONSE]"):
+                print("[*] Exact semantic cache hit!")
+                cached = memory_context.replace("[CACHED_RESPONSE]", "").strip()
+                return cached, []
+                
+        refined_query = f"{role_instruction}\n\n{memory_context}\n\nUser Query: {query}"
+        
+        raw_result = None
         
         # If an image is provided, use the VLM pipeline
         if image_path:
@@ -106,42 +123,45 @@ class IRYMManager:
                 if not self.vlm:
                     self.vlm = get_vlm_pipeline()
                 print(f"[*] Using VLM for query: {query} with image: {image_path}")
-                result = await self.vlm.ask(prompt=refined_query, image_path=image_path, use_rag=True)
-                return await self._process_document_generation(result)
+                raw_result = await self.vlm.ask(prompt=refined_query, image_path=image_path, use_rag=True)
             except Exception as e:
                 print(f"[!] VLM Error: {e}")
                 traceback.print_exc()
-                return f"VLM Error: {str(e)}"
-
-        # Basic router to prevent RAG from hallucinating on simple greetings
-        import re
-        cleaned_query = re.sub(r'[^\w\s]', '', query.lower().strip())
-        chit_chat_phrases = {
-            "hi", "hello", "hey", "thanks", "thank you", "bye", "goodbye", "ok", 
-            "okay", "good morning", "good evening", "how are you", "whats up", "sup"
-        }
+                raw_result = f"VLM Error: {str(e)}"
+        else:
+            # Basic router to prevent RAG from hallucinating on simple greetings
+            import re
+            cleaned_query = re.sub(r'[^\w\s]', '', query.lower().strip())
+            chit_chat_phrases = {
+                "hi", "hello", "hey", "thanks", "thank you", "bye", "goodbye", "ok", 
+                "okay", "good morning", "good evening", "how are you", "whats up", "sup", "yes"
+            }
+            
+            is_conversational = cleaned_query in chit_chat_phrases
+    
+            if is_conversational:
+                print("[*] Query identified as casual conversation. Bypassing RAG.")
+                if not self.llm:
+                     self.llm = container.get("llm")
+                raw_result = await self.llm.generate(refined_query, session_id=session_id)
+            else:
+                try:
+                    # Try RAG first for course-specific knowledge
+                    raw_result = await self.rag.query(refined_query, session_id=session_id)
+                except Exception as e:
+                    print(f"[!] RAG query failed: {e}. Falling back to general LLM.")
+                    traceback.print_exc()
+                    # Fallback to general LLM if RAG fails (e.g. no documents matches)
+                    if not self.llm:
+                         self.llm = container.get("llm")
+                    raw_result = await self.llm.generate(refined_query, session_id=session_id)
+                    
+        new_resp, docs = await self._process_document_generation(raw_result)
         
-        is_conversational = cleaned_query in chit_chat_phrases
-
-        if is_conversational:
-            print("[*] Query identified as casual conversation. Bypassing RAG.")
-            if not self.llm:
-                 self.llm = container.get("llm")
-            result = await self.llm.generate(refined_query, session_id=session_id)
-            return await self._process_document_generation(result)
-
-        try:
-            # Try RAG first for course-specific knowledge
-            result = await self.rag.query(refined_query, session_id=session_id)
-            return await self._process_document_generation(result)
-        except Exception as e:
-            print(f"[!] RAG query failed: {e}. Falling back to general LLM.")
-            traceback.print_exc()
-            # Fallback to general LLM if RAG fails (e.g. no documents matches)
-            if not self.llm:
-                 self.llm = container.get("llm")
-            result = await self.llm.generate(refined_query, session_id=session_id)
-            return await self._process_document_generation(result)
+        if hasattr(self, "memory_engine"):
+            await self.memory_engine.add_interaction(session_id, query, new_resp)
+            
+        return new_resp, docs
             
     async def _process_document_generation(self, response_text: str):
         if not isinstance(response_text, str):
