@@ -1,8 +1,8 @@
-# 🎓 IRYM Educational Chatbot
+# 🎓 Wasla
 
 > **The First Implementation Project Built with the [IRYM SDK](file:///home/tlk/Documents/Projects/IEEE_comp/IRYM_sdk/README.md).**
 
-Welcome to the **IRYM Educational Chatbot**, a powerful, multi-modal AI assistant designed to revolutionize how students interact with course materials. This project serves as the flagship demonstration of the **IRYM SDK**'s capabilities in RAG (Retrieval-Augmented Generation) and VLM (Vision-Language Models).
+Welcome to **Wasla**, a powerful, multi-modal AI assistant designed to revolutionize how students interact with course materials. This project serves as the flagship demonstration of the **IRYM SDK**'s capabilities in RAG (Retrieval-Augmented Generation) and VLM (Vision-Language Models).
 
 ---
 
