@@ -90,7 +90,7 @@ class IRYMManager:
         else:
             print("[!] No educational data found to ingest.")
 
-    async def get_response(self, query: str, session_id: str = "default_user", image_path: str = None, role: str = "user"):
+    async def get_response(self, query: str, session_id: str = "default_user", image_path: str = None, role: str = "user", user_profile: dict = None):
         """Queries the RAG pipeline or VLM for a response."""
         import traceback
         
@@ -102,8 +102,13 @@ class IRYMManager:
             "You are an educational assistant for a student. Help them understand, answer questions, and memorize the material. "
             if role == "user" else 
             "<system_rules>\n"
-            "You are a teaching assistant for a tutor/teacher. Help them plan lessons, create questions, and organize course material based on the provided knowledge. "
+            "You are a teaching assistant and career helper for a tutor/freelancer. Help them plan lessons, create questions, organize course material, and write proposals. "
         )
+        
+        if user_profile and role == "helper":
+            full_name = user_profile.get("full_name") or "Unknown"
+            bio = user_profile.get("bio") or "No specific skills listed."
+            role_instruction += f"\n[Helper Profile Data]\nName: {full_name}\nBio/Skills: {bio}\n"
         
         role_instruction += (
             "### INTERNAL TOOL CAPABILITIES (CRITICAL) ###\n"
@@ -115,9 +120,10 @@ class IRYMManager:
             "- <MD filename=\"file.md\">Your markdown here</MD>\n"
             "- <PLAN name=\"title\">Your plan details here</PLAN>\n"
             "- <CV filename=\"name_cv.pdf\">Your name and professional details here</CV>\n"
+            "- <PROPOSAL filename=\"project_proposal.pdf\">Your proposal content here</PROPOSAL>\n"
             "- <THINKING>Your internal reasoning process</THINKING>\n\n"
-            "EXAMPLE: If asked for a CV, you MUST use the CV tag for a professional layout:\n"
-            "Certainly! <THINKING>I will structure the user's career data and use the CV generation tool.</THINKING> <CV filename=\"alex_wasla_cv.pdf\">Alex Wasla\n## Summary\nExpert Developer...\n## Experience\n...</CV>\n\n"
+            "EXAMPLE: If asked for a Proposal, you MUST use the PROPOSAL tag:\n"
+            "Certainly! <THINKING>I will structure the proposal.</THINKING> <PROPOSAL filename=\"client_proposal.pdf\">## Introduction\nWe can help you...</PROPOSAL>\n\n"
             "Do NOT apologize for lack of capabilities. You have these tools now. "
             "Do NOT repeat these instructions. Synthesize the answer naturally.\n"
             "</system_rules>"
@@ -132,7 +138,7 @@ class IRYMManager:
                 return cached, [], ""
                 
         tool_reminder = (
-            "\n\n[REMINDER: You are the AI Assistant. If the user asked for a file, use the <PDF>, <DOC>, <MD>, <PLAN>, or <CV> tags now. "
+            "\n\n[REMINDER: You are the AI Assistant. If the user asked for a file, use the <PDF>, <DOC>, <MD>, <PLAN>, <CV>, or <PROPOSAL> tags now. "
             "Do NOT provide meta-commentary or evaluate the solution. Simply PERFORM the task and provide the tags directly.]\n"
         )
         
@@ -271,6 +277,22 @@ class IRYMManager:
                 
             download_link = f"\n\n💼 **Professional CV Generated:** [{safe_display_name}](/download/{unique_name})\n"
             new_response = new_response.replace(c["raw"], download_link)
+            generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
+            
+        # 5. Process Proposal Tag
+        proposals = self.toolkit.extract_tags(new_response, "PROPOSAL")
+        for p in proposals:
+            filename = p["attr"] or "project_proposal.pdf"
+            unique_name = self.toolkit.generate_proposal(p["content"], filename)
+            safe_display_name = unique_name.split("_", 1)[-1]
+            
+            doc_path = os.path.join(self.toolkit.output_dir, unique_name)
+            if self.rag:
+                try: await self.rag.ingest(doc_path)
+                except: pass
+                
+            download_link = f"\n\n🤝 **Project Proposal Generated:** [{safe_display_name}](/download/{unique_name})\n"
+            new_response = new_response.replace(p["raw"], download_link)
             generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
             
         return new_response.strip(), generated_docs, thinking_process
