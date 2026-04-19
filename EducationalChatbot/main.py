@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, Redirect
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from engine import irym_manager
-from auth import register, login, make_session_token, verify_session_token
+from auth import register, login, make_session_token, verify_session_token, update_user_profile
 import uvicorn
 import shutil
 import uuid
@@ -26,6 +26,7 @@ async def startup_event():
 
     os.makedirs(os.path.join(BASE_DIR, "uploads"), exist_ok=True)
     os.makedirs(os.path.join(BASE_DIR, "uploads", "docs"), exist_ok=True)
+    os.makedirs(os.path.join(BASE_DIR, "uploads", "cvs"), exist_ok=True)
 
     data_dir = os.path.join(BASE_DIR, "data")
     await irym_manager.initialize(data_dir=data_dir)
@@ -105,6 +106,45 @@ async def logout():
     return response
 
 
+@app.get("/profile", response_class=HTMLResponse)
+async def profile_page(request: Request, session: str = Cookie(default=None)):
+    user = _get_user(session)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("profile.html", {"request": request, "user": user})
+
+
+@app.post("/profile", response_class=HTMLResponse)
+async def profile_submit(
+    request: Request,
+    full_name: str = Form(...),
+    bio: str = Form(...),
+    cv: UploadFile = File(None),
+    session: str = Cookie(default=None)
+):
+    user = _get_user(session)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    
+    cv_filename = None
+    if cv and cv.filename:
+        ext = os.path.splitext(cv.filename)[1]
+        cv_filename = f"cv_{user['username']}_{uuid.uuid4().hex[:8]}{ext}"
+        cv_path = os.path.join(BASE_DIR, "uploads", "cvs", cv_filename)
+        with open(cv_path, "wb") as buffer:
+            shutil.copyfileobj(cv.file, buffer)
+            
+    update_user_profile(user["username"], full_name, bio, cv_filename)
+    
+    # Refresh user data for the template
+    updated_user = _get_user(session)
+    return templates.TemplateResponse("profile.html", {
+        "request": request, 
+        "user": updated_user, 
+        "success": "Profile updated successfully!"
+    })
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Main App Routes
 # ─────────────────────────────────────────────────────────────────────────────
@@ -181,7 +221,13 @@ async def upload_doc(file: UploadFile = File(...), session: str = Cookie(default
 async def download_doc(filename: str, session: str = Cookie(default=None)):
     if not _get_user(session):
         return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    
+    # Check docs folder
     doc_path = os.path.join(BASE_DIR, "uploads", "docs", filename)
+    if not os.path.exists(doc_path):
+        # Check cvs folder
+        doc_path = os.path.join(BASE_DIR, "uploads", "cvs", filename)
+        
     if not os.path.exists(doc_path):
         return JSONResponse({"error": "File not found"}, status_code=404)
     original_name = filename.split("_", 1)[-1] if "_" in filename else filename
