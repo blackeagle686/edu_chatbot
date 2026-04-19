@@ -1,6 +1,10 @@
 import os
 import subprocess
 import sys
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
 
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])

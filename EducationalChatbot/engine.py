@@ -35,6 +35,7 @@ except ImportError:
 from IRYM_sdk.core.lifecycle import lifecycle
 from wasla_memory import WaslaMemoryEngine
 from wasla_tools import WaslaToolKit
+from dotnet_client import dotnet_client
 
 class IRYMManager:
     def __init__(self):
@@ -121,9 +122,12 @@ class IRYMManager:
             "- <PLAN name=\"title\">Your plan details here</PLAN>\n"
             "- <CV filename=\"name_cv.pdf\">Your name and professional details here</CV>\n"
             "- <PROPOSAL filename=\"project_proposal.pdf\">Your proposal content here</PROPOSAL>\n"
-            "- <THINKING>Your internal reasoning process</THINKING>\n\n"
+            "- <THINKING>Your internal reasoning process</THINKING>\n"
+            "- <RECOMMEND_HELPERS>A short description of what kind of expert is needed</RECOMMEND_HELPERS>\n\n"
             "EXAMPLE: If asked for a Proposal, you MUST use the PROPOSAL tag:\n"
             "Certainly! <THINKING>I will structure the proposal.</THINKING> <PROPOSAL filename=\"client_proposal.pdf\">## Introduction\nWe can help you...</PROPOSAL>\n\n"
+            "EXAMPLE: If the user needs help with a project, use the RECOMMEND_HELPERS tag:\n"
+            "I understand you need help with React. <RECOMMEND_HELPERS>React and Frontend specialist</RECOMMEND_HELPERS>\n\n"
             "Do NOT apologize for lack of capabilities. You have these tools now. "
             "Do NOT repeat these instructions. Synthesize the answer naturally.\n"
             "</system_rules>"
@@ -204,11 +208,35 @@ class IRYMManager:
             
         new_resp, docs, thinking = await self._process_tools_and_docs(raw_result)
         
+        # 10. Process Helper Recommendations (if triggered by AI)
+        new_resp = await self._process_helper_recommendations(new_resp)
+        
         if hasattr(self, "memory_engine"):
             await self.memory_engine.add_interaction(session_id, query, new_resp)
             
         return new_resp, docs, thinking
             
+    async def _process_helper_recommendations(self, response_text: str):
+        if "<RECOMMEND_HELPERS>" not in response_text:
+            return response_text
+            
+        import re
+        match = re.search(r'<RECOMMEND_HELPERS>(.*?)</RECOMMEND_HELPERS>', response_text, re.DOTALL)
+        if not match:
+            return response_text
+            
+        query = match.group(1).strip()
+        helpers = await dotnet_client.get_recommendations(query)
+        
+        if not helpers:
+            return response_text.replace(match.group(0), "\n\n*Currently, no experts are available for this specific request. Please try again later.*")
+            
+        rec_block = "\n\n### Recommended Experts for You\n"
+        for h in helpers:
+            rec_block += f"- **{h['name']}** ({', '.join(h['skills'])}) — [View Profile]({h['url']})\n"
+            
+        return response_text.replace(match.group(0), rec_block)
+
     async def _process_tools_and_docs(self, response_text: str):
         if not isinstance(response_text, str) or not self.toolkit:
             return response_text, [], ""
