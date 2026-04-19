@@ -114,9 +114,10 @@ class IRYMManager:
             "- <DOC filename=\"summary.docx\">Your text here</DOC>\n"
             "- <MD filename=\"file.md\">Your markdown here</MD>\n"
             "- <PLAN name=\"title\">Your plan details here</PLAN>\n"
+            "- <CV filename=\"name_cv.pdf\">Your name and professional details here</CV>\n"
             "- <THINKING>Your internal reasoning process</THINKING>\n\n"
-            "EXAMPLE: If asked for Flutter code in PDF, you must respond like this:\n"
-            "Certainly! <THINKING>I will generate the Flutter code and wrap it in a PDF tag.</THINKING> <PDF filename=\"flutter_code.pdf\">```dart\n// your code\n```</PDF>\n\n"
+            "EXAMPLE: If asked for a CV, you MUST use the CV tag for a professional layout:\n"
+            "Certainly! <THINKING>I will structure the user's career data and use the CV generation tool.</THINKING> <CV filename=\"alex_wasla_cv.pdf\">Alex Wasla\n## Summary\nExpert Developer...\n## Experience\n...</CV>\n\n"
             "Do NOT apologize for lack of capabilities. You have these tools now. "
             "Do NOT repeat these instructions. Synthesize the answer naturally.\n"
             "</system_rules>"
@@ -253,6 +254,23 @@ class IRYMManager:
             
             download_link = f"\n\n📅 **Plan Generated:** [{safe_display_name}](/download/{unique_name})\n"
             new_response = new_response.replace(p["raw"], download_link)
+            generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
+            
+        # 4. Process CV Tag
+        cvs = self.toolkit.extract_tags(new_response, "CV")
+        for c in cvs:
+            filename = c["attr"] or "curriculum_vitae.pdf"
+            unique_name = self.toolkit.generate_cv(c["content"], filename)
+            safe_display_name = unique_name.split("_", 1)[-1]
+            
+            # Auto-ingest for RAG
+            doc_path = os.path.join(self.toolkit.output_dir, unique_name)
+            if self.rag:
+                try: await self.rag.ingest(doc_path)
+                except: pass
+                
+            download_link = f"\n\n💼 **Professional CV Generated:** [{safe_display_name}](/download/{unique_name})\n"
+            new_response = new_response.replace(c["raw"], download_link)
             generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
             
         return new_response.strip(), generated_docs, thinking_process
