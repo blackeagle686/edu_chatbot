@@ -420,6 +420,8 @@ body::after {
     line-height: 1.68;
     position: relative;
     word-break: break-word;
+    overflow-wrap: break-word;
+    overflow-x: hidden;
 }
 
 .message.bot {
@@ -470,6 +472,8 @@ body::after {
     border-radius: var(--r-sm);
     overflow-x: auto;
     background: var(--bg-low);
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
 .message.bot a {
