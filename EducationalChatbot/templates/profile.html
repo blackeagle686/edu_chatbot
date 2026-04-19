@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile — Wasla Edu</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/fouc.js"></script>
+</head>
+
+<body class="fixed-layout">
+    <nav class="navbar navbar-auth">
+        <a class="navbar-brand" href="/"><i class="fas fa-brain"></i> Wasla Master</a>
+        <div style="display:flex; gap:1rem; align-items:center;">
+            <button id="themeToggleBtn" title="Toggle Theme"
+                style="border:none; cursor:pointer; background:transparent; font-size:1.1rem; color:var(--txt-m); transition:color 0.2s;"
+                onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='var(--txt-m)'">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+            <a class="nav-pill" href="/"><i class="fas fa-arrow-left"></i> &nbsp;Back to Chat</a>
+        </div>
+    </nav>
+    <main class="auth-main">
+        <div class="auth-card" style="max-width: 600px;">
+            <div class="auth-logo">
+                <div class="auth-logo-icon"><i class="fas fa-user-circle"></i></div>
+                <span class="auth-logo-text">User Profile</span>
+            </div>
+            <h1 class="auth-heading">Manage your profile 👤</h1>
+            <p class="auth-sub">Keep your information up to date to get the best experience.</p>
+
+            {% if success %}
+            <div class="auth-success" style="background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                <i class="fas fa-check-circle"></i> {{ success }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="/profile" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label class="lbl" for="username">Username</label>
+                    <div class="iw">
+                        <i class="fas fa-at ico"></i>
+                        <input type="text" id="username" value="{{ user.username }}" disabled style="opacity: 0.6; cursor: not-allowed;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="lbl" for="full_name">Full Name</label>
+                    <div class="iw">
+                        <i class="fas fa-id-card ico"></i>
+                        <input type="text" id="full_name" name="full_name" value="{{ user.full_name or '' }}" placeholder="Enter your full name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="lbl" for="bio">Bio / Expertise</label>
+                    <div class="iw">
+                        <i class="fas fa-pen ico" style="top: 15px;"></i>
+                        <textarea id="bio" name="bio" placeholder="Tell us about yourself..." style="min-height: 100px; padding-left: 45px; padding-top: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--brd); border-radius: 12px; color: var(--txt-1); width: 100%;">{{ user.bio or '' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="lbl" for="cv">{% if user.role == 'helper' %}Helper CV / Resume{% else %}Portfolio / Document{% endif %}</label>
+                    <div class="cv-upload-box" style="border: 2px dashed var(--brd); border-radius: 12px; padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.02); margin-top: 5px;">
+                        {% if user.cv_filename %}
+                        <div style="margin-bottom: 15px; font-size: 0.9rem;">
+                            <i class="fas fa-file-pdf text-danger me-2"></i>
+                            <a href="/download/{{ user.cv_filename }}" class="text-info" target="_blank">Current CV: {{ user.cv_filename.split('_', 2)[-1] }}</a>
+                        </div>
+                        {% endif %}
+                        <input type="file" id="cv" name="cv" accept=".pdf,.docx,.txt" style="display: none;">
+                        <button type="button" class="btn-outline-secondary" onclick="document.getElementById('cv').click()" style="background: transparent; border: 1px solid var(--secondary); color: var(--secondary); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <i class="fas fa-upload me-2"></i> {% if user.cv_filename %}Replace CV{% else %}Upload CV{% endif %}
+                        </button>
+                        <div id="cv-name" style="margin-top: 10px; font-size: 0.8rem; color: var(--txt-m);">No new file selected</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-main" style="margin-top: 25px;"><i class="fas fa-save"></i> Save Changes</button>
+            </form>
+        </div>
+    </main>
+    <footer>© 2026 Wasla Edu — Crimson Hearth Theme</footer>
+
+    <script>
+        document.getElementById('cv').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : "No new file selected";
+            document.getElementById('cv-name').textContent = "Selected: " + fileName;
+        });
+    </script>
+    <script src="/static/main.js"></script>
+</body>
+
+</html>
