@@ -29,7 +29,13 @@ def register(username: str, password: str, role: str = "user") -> dict:
         return {"error": "Password must be at least 6 characters."}
     if username in _users:
         return {"error": "Username already taken."}
-    _users[username] = {"password_hash": _hash(password), "role": role}
+    _users[username] = {
+        "password_hash": _hash(password),
+        "role": role,
+        "full_name": "",
+        "bio": "",
+        "cv_filename": None
+    }
     return {"ok": True, "username": username, "role": role}
 
 
@@ -58,4 +64,22 @@ def verify_session_token(token: str) -> dict | None:
     if not hmac.compare_digest(expected, sig):
         return None
     user = _users.get(username)
-    return {"username": username, "role": user["role"]} if user else None
+    if not user:
+        return None
+    
+    # Return a copy of the user dict without the password hash
+    user_data = user.copy()
+    user_data.pop("password_hash", None)
+    user_data["username"] = username
+    return user_data
+
+
+def update_user_profile(username: str, full_name: str, bio: str, cv_filename: str = None) -> bool:
+    """Update user profile data in memory."""
+    if username not in _users:
+        return False
+    _users[username]["full_name"] = full_name
+    _users[username]["bio"] = bio
+    if cv_filename:
+        _users[username]["cv_filename"] = cv_filename
+    return True
