@@ -6,7 +6,7 @@ Welcome to **Wasla**, a powerful, multi-modal AI assistant designed to revolutio
 
 ---
 
-## ✨ Key Features
+## ✨ Key Features 
 
 - **📚 AI-Powered Course Assistant**: Ask questions about your study materials and get instant, accurate answers powered by the IRYM RAG pipeline.
 - **👁️ Vision-Language Processing**: Upload images of scientific diagrams, handwritten notes, or textbook pages for instant AI analysis.
