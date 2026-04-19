@@ -132,8 +132,8 @@ class IRYMManager:
                 return cached, [], ""
                 
         tool_reminder = (
-            "\n\n[REMINDER: You are the AI Assistant. If the user asked for a file, use the <PDF>, <DOC>, <MD>, or <PLAN> tags now. "
-            "Show your reasoning in <THINKING> tags first.]\n"
+            "\n\n[REMINDER: You are the AI Assistant. If the user asked for a file, use the <PDF>, <DOC>, <MD>, <PLAN>, or <CV> tags now. "
+            "Do NOT provide meta-commentary or evaluate the solution. Simply PERFORM the task and provide the tags directly.]\n"
         )
         
         refined_query = f"{memory_context}\n\n{role_instruction}{tool_reminder}\nUser Query: {query}"
