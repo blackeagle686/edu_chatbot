@@ -188,7 +188,7 @@ async def chat(
                 shutil.copyfileobj(image.file, buffer)
 
         response, docs, thinking = await irym_manager.get_response(
-            message, session_id=session_id, image_path=image_path, role=role
+            message, session_id=session_id, image_path=image_path, role=role, user_profile=user
         )
         return JSONResponse({"response": response, "generated_docs": docs, "thinking": thinking})
     except Exception as e:
