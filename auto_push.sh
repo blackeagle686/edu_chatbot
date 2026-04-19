@@ -8,7 +8,7 @@ echo "Press Ctrl+C to stop."
 
 while true; do
     # Check if there are any uncommitted changes
-    if [[ -n $(git status -s) ]]; then
+    if [[ -n "$(git status --porcelain)" ]]; then
         echo "Changes detected! Committing and pushing..."
         
         # Add all changes
