@@ -247,7 +247,7 @@ class IRYMManager:
                     try: await self.rag.ingest(doc_path)
                     except: pass
                 
-                download_link = f"\n\n📄 **Generated:** [{safe_display_name}](/download/{unique_name})\n"
+                download_link = f"\n\n**Document Generated:** [{safe_display_name}](/download/{unique_name})\n"
                 new_response = new_response.replace(m["raw"], download_link)
                 generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
 
@@ -258,7 +258,7 @@ class IRYMManager:
             unique_name = self.toolkit.generate_plan(topic, p["content"])
             safe_display_name = unique_name.split("_", 1)[-1]
             
-            download_link = f"\n\n📅 **Plan Generated:** [{safe_display_name}](/download/{unique_name})\n"
+            download_link = f"\n\n**Plan Generated:** [{safe_display_name}](/download/{unique_name})\n"
             new_response = new_response.replace(p["raw"], download_link)
             generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
             
@@ -275,7 +275,7 @@ class IRYMManager:
                 try: await self.rag.ingest(doc_path)
                 except: pass
                 
-            download_link = f"\n\n💼 **Professional CV Generated:** [{safe_display_name}](/download/{unique_name})\n"
+            download_link = f"\n\n**CV Generated:** [{safe_display_name}](/download/{unique_name})\n"
             new_response = new_response.replace(c["raw"], download_link)
             generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
             
@@ -291,7 +291,7 @@ class IRYMManager:
                 try: await self.rag.ingest(doc_path)
                 except: pass
                 
-            download_link = f"\n\n🤝 **Project Proposal Generated:** [{safe_display_name}](/download/{unique_name})\n"
+            download_link = f"\n\n**Proposal Generated:** [{safe_display_name}](/download/{unique_name})\n"
             new_response = new_response.replace(p["raw"], download_link)
             generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
             

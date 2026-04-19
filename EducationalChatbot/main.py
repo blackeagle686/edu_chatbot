@@ -17,9 +17,7 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Lifecycle
-# ─────────────────────────────────────────────────────────────────────────────
 @app.on_event("startup")
 async def startup_event():
     print("[*] FastAPI Startup: Initializing IRYM SDK components...")
@@ -42,18 +40,14 @@ async def shutdown_event():
     await irym_manager.shutdown()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Auth Helpers
-# ─────────────────────────────────────────────────────────────────────────────
 def _get_user(session: str | None) -> dict | None:
     if not session:
         return None
     return verify_session_token(session)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Auth Routes
-# ─────────────────────────────────────────────────────────────────────────────
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request, session: str = Cookie(default=None)):
     if _get_user(session):
@@ -145,9 +139,7 @@ async def profile_submit(
     })
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Main App Routes
-# ─────────────────────────────────────────────────────────────────────────────
 @app.get("/landing", response_class=HTMLResponse)
 async def landing(request: Request):
     return templates.TemplateResponse("landing.html", {"request": request})
