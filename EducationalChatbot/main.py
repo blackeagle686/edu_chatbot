@@ -130,6 +130,14 @@ async def profile_submit(
             
     update_user_profile(user["username"], full_name, bio, cv_filename)
     
+    # Ingest CV into RAG for background awareness
+    if cv_filename:
+        try:
+            cv_path = os.path.join(BASE_DIR, "uploads", "cvs", cv_filename)
+            await irym_manager.rag.ingest(cv_path)
+        except Exception as e:
+            print(f"[!] CV Ingestion Error: {e}")
+    
     # Refresh user data for the template
     updated_user = _get_user(session)
     return templates.TemplateResponse("profile.html", {

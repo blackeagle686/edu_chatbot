@@ -106,10 +106,17 @@ class IRYMManager:
             "You are a teaching assistant and career helper for a tutor/freelancer. Help them plan lessons, create questions, organize course material, and write proposals. "
         )
         
-        if user_profile and role == "helper":
-            full_name = user_profile.get("full_name") or "Unknown"
-            bio = user_profile.get("bio") or "No specific skills listed."
-            role_instruction += f"\n[Helper Profile Data]\nName: {full_name}\nBio/Skills: {bio}\n"
+        if user_profile:
+            full_name = user_profile.get("full_name") or "User"
+            bio = user_profile.get("bio") or "No background information provided."
+            role_type = user_profile.get("role", "user")
+            has_cv = bool(user_profile.get("cv_filename"))
+            
+            role_instruction += f"\n[User Identity]\nName: {full_name}\nBio/Background: {bio}\nRole: {role_type}\n"
+            if has_cv:
+                role_instruction += "Context: The user has provided a background CV. Prioritize this information for career or experience-related questions.\n"
+            
+            role_instruction += f"\nImportant: Always address the user as '{full_name}' to make the experience personalized.\n"
         
         role_instruction += (
             "### INTERNAL TOOL CAPABILITIES (CRITICAL) ###\n"
