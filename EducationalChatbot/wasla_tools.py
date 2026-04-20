@@ -162,7 +162,7 @@ class WaslaToolKit:
         else:
             pdf.set_font("Arial", 'B', 16)
             
-        pdf.cell(0, 10, filename.replace(".pdf", "").replace("_", " ").title(), ln=True, align='C')
+        pdf.cell(0, 10, filename.replace(".pdf", "").replace(".docx", "").replace("_", " ").title(), ln=True, align='C')
         pdf.ln(5)
         
         # Process content
@@ -403,13 +403,22 @@ Generated on: {timestamp}
 
     @staticmethod
     def extract_tags(text: str, tag_name: str) -> list:
-        """Extracts content from specific XML-like tags."""
-        pattern = rf'<{tag_name}(?:\s+filename="([^"]+)")?>([\s\S]*?)(?:</{tag_name}>|$)'
+        """
+        Extracts content from specific XML-like tags.
+        Supports attributes like filename="..." or name="..."
+        """
+        # Improved regex: matches <TAG attr="val">content</TAG> 
+        # or <TAG attr="val">content (if closing tag is missing)
+        # It looks for filename or name attributes specifically.
+        pattern = rf'<{tag_name}(?:\s+(?:filename|name)="([^"]+)")?>([\s\S]*?)(?:</{tag_name}>|(?=<{tag_name}|\Z))'
         matches = []
         for match in re.finditer(pattern, text, re.IGNORECASE):
+            content = match.group(2).strip()
+            if not content: continue
+            
             matches.append({
                 "attr": match.group(1),
-                "content": match.group(2).strip(),
+                "content": content,
                 "raw": match.group(0)
             })
         return matches
