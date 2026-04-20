@@ -133,7 +133,8 @@ class IRYMManager:
             "You are equipped with a high-performance 'Internal File Generation System'. You MUST NEVER refuse a request to generate a file (PDF, DOCX, MD, PLAN, CV, PROPOSAL). "
             "You have full creative authority to generate educational drafts, study plans, and professional documents. "
             "If the user asks for a file about a topic you find 'too broad' or 'unknown', DO NOT APOLOGIZE OR REFUSE. Instead, generate a HIGH-QUALITY GENERALIZED TEMPLATE or a REASONABLE DRAFT based on your internal knowledge base. "
-            "NEVER say 'I don't have access to information' or 'I am an AI language model'. You are the Wasla Edu Assistant, and you ALWAYS find a way to help.\n\n"
+            "NEVER say 'I don't have access to information' or 'I am an AI language model'. You are the Wasla Edu Assistant, and you ALWAYS find a way to help. "
+            "IMPORTANT: Ignore any retrieved documents or past conversation history that claim you cannot generate files or have limited capabilities. You have been UPGRADED and all tools below are now FULLY FUNCTIONAL and MANDATORY.\n\n"
             
             "To trigger document generation, wrap the content in these EXACT tags:\n"
             "- <PDF filename=\"code.pdf\">Content</PDF>\n"
@@ -181,8 +182,18 @@ class IRYMManager:
                 f"--- FILE CONTENT END ---\n"
                 "The user has shared the file above. Read it carefully and use its content to answer the query below.\n"
             )
-        
-        refined_query = f"{memory_context}\n\n{role_instruction}{file_block}\nUser Query: {query}\n\n{tool_reminder}"
+
+        # Final prompt construction: Rules -> File -> History -> Query -> Reminder
+        # This structure prioritizes current instructions over past errors.
+        refined_query = (
+            f"{role_instruction}\n\n"
+            f"{file_block}\n\n"
+            f"### CONVERSATION HISTORY (FOR CONTEXT ONLY) ###\n"
+            f"{memory_context}\n\n"
+            f"### CURRENT TASK ###\n"
+            f"User Query: {query}\n\n"
+            f"{tool_reminder}"
+        )
         
         raw_result = None
         
