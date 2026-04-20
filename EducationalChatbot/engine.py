@@ -1,6 +1,9 @@
 import os
 import sys
 import asyncio
+import json
+import time
+from datetime import datetime
 
 # Optimization for CUDA memory management to prevent fragmentation and OOM
 os.environ["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
@@ -301,30 +304,48 @@ class IRYMManager:
         if not self.rag:
             raise RuntimeError("IRYM Manager not initialized. Call initialize() first.")
             
+        start_time = time.time()
+        
+        user_context = user_context or {}
+        system_context = system_context or {}
+        
         # 1. Build Persona and Instructions based on User Context
         name = user_context.get("name", "User")
         role = user_context.get("role", "Seeker")
         
         system_rules = (
             "<system_rules>\n"
-            f"You are Wasla Master, a professional AI assistant for the WaslaSerga platform. "
+            f"You are Wasla Master, a professional AI assistant for the Wasla platform.\n"
             f"You are currently helping {name} who is a {role}.\n"
             "Your goal is to provide high-quality educational support, career guidance, and task assistance.\n\n"
-            "### INTERNAL TOOL CAPABILITIES (MANDATORY) ###\n"
-            "You MUST use these tags to trigger platform actions. The server will extract them and execute the tasks.\n"
-            "- <PDF filename=\"name.pdf\">Content</PDF> -> Generates a PDF\n"
-            "- <DOC filename=\"name.docx\">Content</DOC> -> Generates a Word Doc\n"
-            "- <PLAN name=\"title\">Details</PLAN> -> Generates a Study Plan\n"
-            "- <CV filename=\"name_cv.pdf\">Details</CV> -> Generates a Professional CV\n"
-            "- <PROPOSAL filename=\"name.pdf\">Details</PROPOSAL> -> Generates a Project Proposal\n"
-            "- <RECOMMEND_HELPERS>Search query for helpers</RECOMMEND_HELPERS> -> Recommends experts\n"
-            "- <THINKING>Your reasoning</THINKING>\n\n"
+            "You MUST output your response ONLY as a valid JSON object matching the requested schema. No markdown wrapping or additional text.\n\n"
+            "Logic Steps to follow internally:\n"
+            "1. Classify intent (find helper / create task / general question)\n"
+            "2. Extract requirements (skills, domain, budget hints)\n"
+            "3. Match helpers: Score helpers in systemContext.topHelpers against requirements, pick top 3 IDs.\n"
+            "4. Build responseText: Natural language reply referencing what you found.\n"
+            "5. Build actions array: e.g., RECOMMEND_HELPERS with matched IDs, optionally SHOW_TASK_FORM.\n\n"
+            "Allowed Action Types you can return:\n"
+            "DISPLAY_TEXT, RECOMMEND_HELPERS, NAVIGATE_TO_PAGE, SHOW_TASK_FORM, SHOW_SERVICE_DETAILS, REQUEST_MORE_INFO, CONFIRM_ACTION\n\n"
+            "Response Schema:\n"
+            "{\n"
+            "  \"responseText\": \"Your natural language reply here\",\n"
+            "  \"actions\": [\n"
+            "    {\n"
+            "      \"type\": \"RECOMMEND_HELPERS\",\n"
+            "      \"priority\": 1,\n"
+            "      \"payload\": {\n"
+            "        \"helperIds\": [1, 5, 12],\n"
+            "        \"reasoning\": \"Why you picked these helpers\",\n"
+            "        \"filters\": { \"skills\": [\"React\"], \"minRating\": 4.5 }\n"
+            "      }\n"
+            "    }\n"
+            "  ]\n"
+            "}\n\n"
             "### USER CONTEXT ###\n"
-            f"Name: {name}\nRole: {role}\nSkills: {', '.join(user_context.get('skills', []))}\n"
-            f"Location: {user_context.get('location', 'Unknown')}\n"
-            f"Bio: {user_context.get('bio', 'No bio provided')}\n\n"
+            f"{json.dumps(user_context, indent=2)}\n\n"
             "### SYSTEM CONTEXT ###\n"
-            f"Available Categories: {', '.join(system_context.get('availableCategories', []))}\n"
+            f"{json.dumps(system_context, indent=2)}\n"
             "</system_rules>"
         )
 
@@ -338,7 +359,7 @@ class IRYMManager:
             f"{system_rules}\n\n"
             f"### CONVERSATION HISTORY ###\n{history_str}\n\n"
             f"### CURRENT USER MESSAGE ###\n{query}\n\n"
-            "[Perform the task now. Use tags if needed.]"
+            "[Perform the task now and return ONLY a valid JSON object.]"
         )
 
         # 4. Generate Response
@@ -347,73 +368,42 @@ class IRYMManager:
             
         raw_result = await self.llm.generate(refined_query, session_id=userId)
         
-        # 5. Extract Actions and Clean Text
-        actions = []
-        cleaned_text = raw_result
-        
-        # Extract Thinking
-        thoughts = self.toolkit.extract_tags(cleaned_text, "THINKING")
-        thinking_process = ""
-        if thoughts:
-            thinking_process = "\n".join([t["content"] for t in thoughts])
-            for t in thoughts: cleaned_text = cleaned_text.replace(t["raw"], "")
+        # 5. Extract and parse JSON
+        try:
+            import re
+            # Extract json block if the llm wrapped it in markdown
+            json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', raw_result, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1)
+            else:
+                json_str = raw_result.strip()
+                # Might have starting/ending whitespace or not be properly formed
+                start_idx = json_str.find('{')
+                end_idx = json_str.rfind('}')
+                if start_idx != -1 and end_idx != -1:
+                    json_str = json_str[start_idx:end_idx+1]
+                    
+            parsed_result = json.loads(json_str)
+            response_text = parsed_result.get("responseText", "")
+            actions = parsed_result.get("actions", [])
+        except Exception as e:
+            print(f"[!] Failed to parse LLM response as JSON: {e}")
+            response_text = raw_result.strip()
+            actions = []
             
-        # Extract Helper Recommendations
-        recs = self.toolkit.extract_tags(cleaned_text, "RECOMMEND_HELPERS")
-        for r in recs:
-            actions.append({
-                "type": AIActionType.RECOMMEND_HELPERS,
-                "priority": 1,
-                "payload": {
-                    "query": r["content"],
-                    "reasoning": "Based on your current request"
-                }
-            })
-            cleaned_text = cleaned_text.replace(r["raw"], "")
-
-        # Extract Document Generation Actions
-        doc_tags = [("PDF", ".pdf", 6), ("DOC", ".docx", 6), ("PLAN", ".md", 6), ("CV", ".pdf", 6), ("PROPOSAL", ".pdf", 6)]
-        generated_docs = []
-        
-        for tag, ext, act_type in doc_tags:
-            matches = self.toolkit.extract_tags(cleaned_text, tag)
-            for m in matches:
-                filename = m["attr"] or f"generated_doc{ext}"
-                content = m["content"]
-                
-                # Actually generate the file so it's ready for download
-                func_map = {
-                    "PDF": self.toolkit.generate_pdf,
-                    "DOC": self.toolkit.generate_docx,
-                    "PLAN": self.toolkit.generate_plan,
-                    "CV": self.toolkit.generate_cv,
-                    "PROPOSAL": self.toolkit.generate_proposal
-                }
-                
-                unique_name = func_map[tag](content, filename)
-                download_url = f"/api/ai/download/{unique_name}"
-                
-                actions.append({
-                    "type": AIActionType.GENERATE_DOCUMENT,
-                    "priority": 2,
-                    "payload": {
-                        "documentType": tag,
-                        "filename": filename,
-                        "downloadUrl": download_url
-                    }
-                })
-                generated_docs.append({"name": filename, "url": download_url})
-                cleaned_text = cleaned_text.replace(m["raw"], f"\n\n**Generated Document:** {filename}")
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        conv_id = metadata.get("conversationId", userId) if metadata else userId
 
         # 6. Final Response Object
         return {
-            "responseText": cleaned_text.strip(),
+            "responseText": response_text,
             "actions": actions,
-            "generatedDocs": generated_docs,
-            "conversationId": userId, # Use userId as sessionId/convId
+            "generatedDocs": [],
+            "conversationId": conv_id,
             "metadata": {
-                "thinkingProcess": thinking_process,
+                "processingTimeMs": processing_time_ms,
                 "modelVersion": "gpt-4-custom",
+                "confidence": 0.95,
                 "timestamp": datetime.now().isoformat()
             }
         }

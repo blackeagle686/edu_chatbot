@@ -1,14 +1,12 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from engine import irym_manager
-from dotnet_client import dotnet_client
 import os
 import uuid
-import shutil
 
+# Remove prefix so it matches POST {AIService:BaseUrl}/chat and /ingest exactly
 ai_router = APIRouter(prefix="/api/v1/ai", tags=["AI Integration"])
-rec_router = APIRouter(prefix="/api/v1/recommendations", tags=["Recommendations"])
 
 class UserContext(BaseModel):
     name: Optional[str] = "User"
@@ -19,6 +17,9 @@ class UserContext(BaseModel):
     memberSince: Optional[str] = None
     email: Optional[str] = None
     bio: Optional[str] = None
+    currentHeadline: Optional[str] = None
+    currentBio: Optional[str] = None
+    experience: Optional[str] = None
 
 class SystemContext(BaseModel):
     availableCategories: Optional[List[str]] = []
@@ -42,7 +43,7 @@ class ChatRequest(BaseModel):
 async def api_chat(request: ChatRequest):
     try:
         # Pass the full context to the engine
-        # The engine will now return the raw structure for .NET
+        # The engine will return the raw structure for .NET
         result = await irym_manager.get_api_response(
             query=request.message,
             userId=request.userId,
@@ -60,47 +61,53 @@ async def api_chat(request: ChatRequest):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+
+class FileMetadata(BaseModel):
+    fileName: str
+    contentType: Optional[str] = None
+    size: Optional[int] = 0
+    pageCount: Optional[int] = 0
+
 class IngestRequest(BaseModel):
     userId: str
     featureType: str
     fileContent: Optional[str] = None
+    fileMetadata: Optional[FileMetadata] = None
+    userContext: Optional[UserContext] = None
     options: Optional[Dict[str, Any]] = {}
+    metadata: Optional[Dict[str, Any]] = {}
 
 @ai_router.post("/ingest")
-async def api_ingest(
-    userId: str,
-    featureType: str,
-    file: UploadFile = File(...),
-    options: Optional[str] = None  # JSON string from multipart
-):
+async def api_ingest(request: IngestRequest):
     try:
-        import json
-        parsed_options = json.loads(options) if options else {}
-        
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        ext = os.path.splitext(file.filename)[1]
-        filename = f"{uuid.uuid4()}{ext}"
+        filename = request.fileMetadata.fileName if request.fileMetadata else f"{uuid.uuid4()}.txt"
+        
+        # Ingest requires a file path, so we save the extracted text sent by .NET to a local temp file
         doc_path = os.path.join(BASE_DIR, "uploads", "docs", filename)
         
-        with open(doc_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        if request.fileContent:
+            with open(doc_path, "w", encoding="utf-8") as f:
+                f.write(request.fileContent)
+                
+            # Ingest for RAG
+            await irym_manager.rag.ingest(doc_path)
             
-        # Ingest for RAG
-        await irym_manager.rag.ingest(doc_path)
-        
-        # Extract text for analysis
-        from wasla_tools import extract_file_content
-        text_content = extract_file_content(doc_path)
-        
+            text_content = request.fileContent
+        else:
+            text_content = ""
+            
         # Call engine for specific feature processing
         result = await irym_manager.process_ingest(
-            userId=userId,
-            featureType=featureType,
+            userId=request.userId,
+            featureType=request.featureType,
             text=text_content,
-            filename=file.filename,
-            options=parsed_options
+            filename=filename,
+            options=request.options
         )
         
         return result
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
