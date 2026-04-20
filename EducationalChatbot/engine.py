@@ -109,14 +109,24 @@ class IRYMManager:
         if user_profile:
             full_name = user_profile.get("full_name") or "User"
             bio = user_profile.get("bio") or "No background information provided."
+            email = user_profile.get("email") or "Not provided"
             role_type = user_profile.get("role", "user")
             has_cv = bool(user_profile.get("cv_filename"))
+            has_image = bool(user_profile.get("profile_image"))
             
-            role_instruction += f"\n[User Identity]\nName: {full_name}\nBio/Background: {bio}\nRole: {role_type}\n"
+            role_instruction += f"\n[User Identity]\nName: {full_name}\nEmail: {email}\nBio/Background: {bio}\nRole: {role_type}\nHas Profile Image: {'Yes' if has_image else 'No'}\n"
             if has_cv:
                 role_instruction += "Context: The user has provided a background CV. Prioritize this information for career or experience-related questions.\n"
             
             role_instruction += f"\nImportant: Always address the user as '{full_name}' to make the experience personalized.\n"
+            
+        if role == "user":
+            role_instruction += (
+                "When the user explains a problem, shares an idea, or uploads project documents, assess the complexity:\n"
+                "- If Easy: Provide a direct solution.\n"
+                "- If Medium: Provide a hint and use the <RECOMMEND_HELPERS> tag to recommend an expert.\n"
+                "- If Hard: Do not provide a direct solution, use the <RECOMMEND_HELPERS> tag to recommend an expert.\n"
+            )
         
         role_instruction += (
             "### INTERNAL TOOL CAPABILITIES (CRITICAL) ###\n"
@@ -129,6 +139,7 @@ class IRYMManager:
             "- <PLAN name=\"title\">Your plan details here</PLAN>\n"
             "- <CV filename=\"name_cv.pdf\">Your name and professional details here</CV>\n"
             "- <PROPOSAL filename=\"project_proposal.pdf\">Your proposal content here</PROPOSAL>\n"
+            "- <UPDATE_PROFILE full_name=\"Name\" email=\"email\" bio=\"New bio\">Updating...</UPDATE_PROFILE>\n"
             "- <THINKING>Your internal reasoning process</THINKING>\n"
             "- <RECOMMEND_HELPERS>A short description of what kind of expert is needed</RECOMMEND_HELPERS>\n\n"
             
@@ -219,7 +230,27 @@ class IRYMManager:
             raw_result = raw_result.strip()
             
             
+        # Process tools and docs
         new_resp, docs, thinking = await self._process_tools_and_docs(raw_result)
+        
+        # Process Profile Updates
+        if "<UPDATE_PROFILE" in new_resp and user_profile:
+            import re
+            profile_update_match = re.search(r'<UPDATE_PROFILE\s+(.*?)\s*/?>.*?(?:</UPDATE_PROFILE>)?', new_resp, re.IGNORECASE | re.DOTALL)
+            if profile_update_match:
+                attrs_str = profile_update_match.group(1)
+                name_m = re.search(r'full_name=["\'](.*?)["\']', attrs_str)
+                email_m = re.search(r'email=["\'](.*?)["\']', attrs_str)
+                bio_m = re.search(r'bio=["\'](.*?)["\']', attrs_str)
+                
+                new_full_name = name_m.group(1) if name_m else user_profile.get("full_name", "")
+                new_email = email_m.group(1) if email_m else user_profile.get("email", "")
+                new_bio = bio_m.group(1) if bio_m else user_profile.get("bio", "")
+                
+                from auth import update_user_profile
+                update_user_profile(user_profile["username"], new_full_name, new_bio, email=new_email, profile_image=user_profile.get("profile_image"), cv_filename=user_profile.get("cv_filename"))
+                
+                new_resp = re.sub(r'<UPDATE_PROFILE.*?>.*?(?:</UPDATE_PROFILE>)?', '\n\n**Profile successfully updated.**\n', new_resp, flags=re.IGNORECASE | re.DOTALL)
         
         # 10. Process Helper Recommendations (if triggered by AI)
         new_resp = await self._process_helper_recommendations(new_resp)

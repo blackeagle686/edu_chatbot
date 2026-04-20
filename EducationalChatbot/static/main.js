@@ -59,8 +59,12 @@
     const removeBtn = document.getElementById('remove-image-btn');
     const sendBtn = document.getElementById('send-btn');
     const welcomeTime = document.getElementById('welcome-time');
+    const historyList = document.getElementById('history-list');
+    const btnNewChat = document.getElementById('btn-new-chat');
 
     let selectedImage = null;
+    let currentSessionId = '';
+    let replyContext = '';
 
     /* ── Initialization ── */
     if (welcomeTime) welcomeTime.textContent = now();
@@ -146,6 +150,7 @@
 
         const bubble = document.createElement('div');
         bubble.classList.add('message', sender);
+        bubble.style.position = 'relative';
 
         if (imageUrl) {
             const img = document.createElement('img');
@@ -175,6 +180,29 @@
         time.classList.add('msg-time');
         time.textContent = now();
         bubble.appendChild(time);
+        
+        if (sender === 'bot') {
+            const replyBtn = document.createElement('button');
+            replyBtn.className = 'btn-reply';
+            replyBtn.innerHTML = '<i class="fas fa-reply"></i> Reply';
+            replyBtn.onclick = () => {
+                replyContext = text.length > 50 ? text.substring(0, 50) + '...' : text;
+                userInput.value = '';
+                userInput.focus();
+                
+                // Show temporary reply indicator above input
+                let indicator = document.getElementById('reply-indicator');
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.id = 'reply-indicator';
+                    indicator.className = 'reply-quote mx-3 mt-2';
+                    const parent = document.querySelector('.chat-input-area form');
+                    parent.insertBefore(indicator, parent.firstChild);
+                }
+                indicator.innerHTML = `<span>Replying to: "${replyContext}"</span> <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;" onclick="this.parentElement.remove(); replyContext='';"></button>`;
+            };
+            bubble.appendChild(replyBtn);
+        }
 
         row.appendChild(avatar);
         row.appendChild(bubble);
@@ -209,11 +237,19 @@
         if (e) e.preventDefault();
         if (isProcessing) return;
 
-        const message = userInput ? userInput.value.trim() : "";
-        if (!message && !selectedImage) return;
+        const messageInput = userInput ? userInput.value.trim() : "";
+        if (!messageInput && !selectedImage) return;
 
         isProcessing = true;
-        const prompt = message || 'Analyze this image.';
+        let prompt = messageInput || 'Analyze this image.';
+        
+        if (replyContext) {
+            prompt = `[Replying to: "${replyContext}"]\n\n` + prompt;
+            replyContext = '';
+            const indicator = document.getElementById('reply-indicator');
+            if (indicator) indicator.remove();
+        }
+        
         const currentImage = selectedImage;
         const imageUrl = currentImage ? URL.createObjectURL(currentImage) : null;
 
@@ -233,6 +269,9 @@
             const formData = new FormData();
             formData.append('message', prompt);
             formData.append('role', config.userRole);
+            if (currentSessionId) {
+                formData.append('session_id', currentSessionId);
+            }
             if (currentImage) {
                 formData.append('image', currentImage);
             }
@@ -282,6 +321,11 @@
                         list.appendChild(div);
                     });
                 }
+            }
+            
+            if (data.session_id && currentSessionId !== data.session_id) {
+                currentSessionId = data.session_id;
+                fetchSessions(); // Refresh list
             }
 
         } catch (err) {
@@ -334,6 +378,82 @@
             }
         });
     }
+
+    /* ── History Logic ── */
+    async function fetchSessions() {
+        if (!historyList) return;
+        try {
+            const res = await fetch('/api/sessions');
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+            
+            historyList.innerHTML = '';
+            if (!data.sessions || data.sessions.length === 0) {
+                historyList.innerHTML = '<div class="text-center p-3 text-muted" style="font-size: 0.8rem;">No recent chats.</div>';
+                return;
+            }
+            
+            data.sessions.forEach(sess => {
+                const div = document.createElement('div');
+                div.className = 'session-item' + (sess.id === currentSessionId ? ' active' : '');
+                div.textContent = sess.title || 'Chat session';
+                div.onclick = () => loadSession(sess.id);
+                historyList.appendChild(div);
+            });
+        } catch (e) {
+            historyList.innerHTML = '<div class="text-center p-3 text-danger" style="font-size: 0.8rem;">Error loading history</div>';
+        }
+    }
+    
+    async function loadSession(sessionId) {
+        if (isProcessing) return;
+        currentSessionId = sessionId;
+        if (chatMessages) {
+            chatMessages.innerHTML = '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-secondary"></i></div>';
+        }
+        
+        fetchSessions(); // update active class
+        
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}`);
+            if (!res.ok) throw new Error('Failed to fetch messages');
+            const data = await res.json();
+            
+            chatMessages.innerHTML = '<div class="chat-divider"><span>History</span></div>';
+            
+            if (data.messages && data.messages.length > 0) {
+                data.messages.forEach(m => {
+                    appendMessage(m.content, m.role, null, null); // No image/thinking stored in basic history for now
+                });
+            } else {
+                chatMessages.innerHTML = '<div class="chat-divider"><span>Empty Session</span></div>';
+            }
+        } catch (e) {
+            chatMessages.innerHTML = `<div class="alert alert-danger">Error loading messages.</div>`;
+        }
+    }
+
+    if (btnNewChat) {
+        btnNewChat.onclick = () => {
+            currentSessionId = '';
+            if (chatMessages) {
+                chatMessages.innerHTML = `
+                    <div class="chat-divider"><span>New Chat</span></div>
+                    <div class="message-row">
+                        <div class="msg-avatar bot-av"><i class="fas fa-robot"></i></div>
+                        <div>
+                            <div class="message bot welcome">
+                                Hello! I'm your <strong>Wasla Edu Assistant</strong>.<br>
+                                Ask me anything about your courses, or upload an image for AI-powered visual analysis!
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            fetchSessions();
+        };
+    }
+    
+    fetchSessions(); // Init load
 
     /* ── Export for manual use if needed ── */
     window.previewDocument = previewDocument;

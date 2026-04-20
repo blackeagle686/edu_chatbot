@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, Redirect
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from engine import irym_manager
-from auth import register, login, make_session_token, verify_session_token, update_user_profile
+from auth import register, login, make_session_token, verify_session_token, update_user_profile, get_user_sessions, get_session_messages, create_chat_session, add_chat_message
 import uvicorn
 import shutil
 import uuid
@@ -113,6 +113,8 @@ async def profile_submit(
     request: Request,
     full_name: str = Form(...),
     bio: str = Form(...),
+    email: str = Form(""),
+    profile_image: UploadFile = File(None),
     cv: UploadFile = File(None),
     session: str = Cookie(default=None)
 ):
@@ -128,7 +130,15 @@ async def profile_submit(
         with open(cv_path, "wb") as buffer:
             shutil.copyfileobj(cv.file, buffer)
             
-    update_user_profile(user["username"], full_name, bio, cv_filename)
+    img_filename = None
+    if profile_image and profile_image.filename:
+        ext = os.path.splitext(profile_image.filename)[1]
+        img_filename = f"img_{user['username']}_{uuid.uuid4().hex[:8]}{ext}"
+        img_path = os.path.join(BASE_DIR, "static", img_filename)
+        with open(img_path, "wb") as buffer:
+            shutil.copyfileobj(profile_image.file, buffer)
+            
+    update_user_profile(user["username"], full_name, bio, email, img_filename, cv_filename)
     
     # Ingest CV into RAG for background awareness
     if cv_filename:
@@ -145,6 +155,24 @@ async def profile_submit(
         "user": updated_user, 
         "success": "Profile updated successfully!"
     })
+
+
+# Chat History API Routes
+@app.get("/api/sessions")
+async def api_get_sessions(session: str = Cookie(default=None)):
+    user = _get_user(session)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    sessions = get_user_sessions(user["username"])
+    return JSONResponse({"sessions": sessions})
+
+@app.get("/api/sessions/{session_id}")
+async def api_get_session_messages(session_id: str, session: str = Cookie(default=None)):
+    user = _get_user(session)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    messages = get_session_messages(session_id)
+    return JSONResponse({"messages": messages})
 
 
 # Main App Routes
@@ -165,7 +193,7 @@ async def index(request: Request, session: str = Cookie(default=None)):
 async def chat(
     request: Request,
     message: str = Form(...),
-    session_id: str = Form("default_user"),
+    session_id: str = Form(""),
     role: str = Form("user"),
     image: UploadFile = File(None),
     session: str = Cookie(default=None),
@@ -174,9 +202,16 @@ async def chat(
     if not user:
         return JSONResponse({"error": "Unauthorized"}, status_code=401)
 
-    # Use authenticated role if not explicitly overridden
+    username = user["username"]
     role = role or user.get("role", "user")
-    session_id = user.get("username", session_id)
+    
+    if not session_id:
+        session_id = str(uuid.uuid4())
+        create_chat_session(username, session_id, title=message[:30] + "...")
+    else:
+        create_chat_session(username, session_id, title="Continued Chat")
+        
+    add_chat_message(session_id, "user", message)
 
     try:
         image_path = None
@@ -190,7 +225,15 @@ async def chat(
         response, docs, thinking = await irym_manager.get_response(
             message, session_id=session_id, image_path=image_path, role=role, user_profile=user
         )
-        return JSONResponse({"response": response, "generated_docs": docs, "thinking": thinking})
+        
+        add_chat_message(session_id, "bot", response)
+        
+        return JSONResponse({
+            "response": response, 
+            "generated_docs": docs, 
+            "thinking": thinking,
+            "session_id": session_id
+        })
     except Exception as e:
         import traceback
         print(f"[!] Critical Route Error: {e}")

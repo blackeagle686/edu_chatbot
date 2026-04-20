@@ -58,10 +58,34 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="lbl" for="email">Email Address</label>
+                    <div class="iw">
+                        <i class="fas fa-envelope ico"></i>
+                        <input type="email" id="email" name="email" value="{{ user.email or '' }}" placeholder="Enter your email">
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label class="lbl" for="bio">Bio / Expertise</label>
                     <div class="iw">
                         <i class="fas fa-pen ico" style="top: 15px;"></i>
                         <textarea id="bio" name="bio" placeholder="Tell us about yourself..." style="min-height: 100px; padding-left: 45px; padding-top: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--brd); border-radius: 12px; color: var(--txt-1); width: 100%;">{{ user.bio or '' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="lbl" for="profile_image">Profile Image</label>
+                    <div class="cv-upload-box" style="border: 2px dashed var(--brd); border-radius: 12px; padding: 20px; text-align: center; background: rgba(255, 255, 255, 0.02); margin-top: 5px;">
+                        {% if user.profile_image %}
+                        <div style="margin-bottom: 15px;">
+                            <img src="/static/{{ user.profile_image }}" alt="Profile" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary);">
+                        </div>
+                        {% endif %}
+                        <input type="file" id="profile_image" name="profile_image" accept="image/*" style="display: none;">
+                        <button type="button" class="btn-outline-secondary" onclick="document.getElementById('profile_image').click()" style="background: transparent; border: 1px solid var(--secondary); color: var(--secondary); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <i class="fas fa-image me-2"></i> {% if user.profile_image %}Change Image{% else %}Upload Image{% endif %}
+                        </button>
+                        <div id="img-name" style="margin-top: 10px; font-size: 0.8rem; color: var(--txt-m);">No new image selected</div>
                     </div>
                 </div>
 
@@ -92,6 +116,10 @@
         document.getElementById('cv').addEventListener('change', function(e) {
             const fileName = e.target.files[0] ? e.target.files[0].name : "No new file selected";
             document.getElementById('cv-name').textContent = "Selected: " + fileName;
+        });
+        document.getElementById('profile_image').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : "No new image selected";
+            document.getElementById('img-name').textContent = "Selected: " + fileName;
         });
     </script>
     <script src="/static/main.js"></script>

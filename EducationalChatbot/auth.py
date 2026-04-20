@@ -27,6 +27,30 @@ def init_db():
                 cv_filename TEXT
             )
         """)
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''")
+            conn.execute("ALTER TABLE users ADD COLUMN profile_image TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            pass # Columns already exist
+            
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS chat_sessions (
+                id TEXT PRIMARY KEY,
+                username TEXT NOT NULL,
+                title TEXT DEFAULT 'New Chat',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS chat_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id TEXT NOT NULL,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
+            )
+        """)
         conn.commit()
 
 @contextmanager
@@ -111,24 +135,48 @@ def verify_session_token(token: str) -> dict | None:
     user_data.pop("password_hash", None)
     return user_data
 
-def update_user_profile(username: str, full_name: str, bio: str, cv_filename: str = None) -> bool:
+def update_user_profile(username: str, full_name: str, bio: str, email: str = "", profile_image: str = None, cv_filename: str = None) -> bool:
     """Update user profile data in the database."""
     try:
         with get_db() as conn:
+            query = "UPDATE users SET full_name = ?, bio = ?, email = ?"
+            params = [full_name, bio, email]
+            
+            if profile_image:
+                query += ", profile_image = ?"
+                params.append(profile_image)
+                
             if cv_filename:
-                conn.execute(
-                    "UPDATE users SET full_name = ?, bio = ?, cv_filename = ? WHERE username = ?",
-                    (full_name, bio, cv_filename, username)
-                )
-            else:
-                conn.execute(
-                    "UPDATE users SET full_name = ?, bio = ? WHERE username = ?",
-                    (full_name, bio, username)
-                )
+                query += ", cv_filename = ?"
+                params.append(cv_filename)
+                
+            query += " WHERE username = ?"
+            params.append(username)
+            
+            conn.execute(query, tuple(params))
             conn.commit()
             return conn.total_changes > 0
-    except Exception:
+    except Exception as e:
+        print(f"[!] update_user_profile Error: {e}")
         return False
+
+def create_chat_session(username: str, session_id: str, title: str = "New Chat"):
+    with get_db() as conn:
+        conn.execute("INSERT OR IGNORE INTO chat_sessions (id, username, title) VALUES (?, ?, ?)", (session_id, username, title))
+        conn.commit()
+
+def get_user_sessions(username: str):
+    with get_db() as conn:
+        return [dict(r) for r in conn.execute("SELECT * FROM chat_sessions WHERE username = ? ORDER BY created_at DESC", (username,)).fetchall()]
+
+def add_chat_message(session_id: str, role: str, content: str):
+    with get_db() as conn:
+        conn.execute("INSERT INTO chat_messages (session_id, role, content) VALUES (?, ?, ?)", (session_id, role, content))
+        conn.commit()
+
+def get_session_messages(session_id: str):
+    with get_db() as conn:
+        return [dict(r) for r in conn.execute("SELECT * FROM chat_messages WHERE session_id = ? ORDER BY timestamp ASC", (session_id,)).fetchall()]
 
 # Initialize the database on module load
 init_db()

@@ -72,6 +72,17 @@
     </nav>
 
     <div class="main-flex">
+        <!-- ───────────── Chat History Sidebar ───────────── -->
+        <div id="history-sidebar" class="history-sidebar d-none d-md-flex">
+            <div class="history-header">
+                <h6><i class="fas fa-history me-2"></i>History</h6>
+                <button class="btn-new-chat" id="btn-new-chat" title="Start a new chat"><i class="fas fa-plus"></i></button>
+            </div>
+            <div class="history-list" id="history-list">
+                <div class="text-center p-3 text-muted" style="font-size: 0.8rem;">Loading history...</div>
+            </div>
+        </div>
+
         <!-- ───────────── Chat Container ───────────── -->
         <div class="chat-container">
             <div class="chat-card">
