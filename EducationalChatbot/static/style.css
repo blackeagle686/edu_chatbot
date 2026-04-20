@@ -1361,8 +1361,8 @@ label.lbl {
     transition: opacity .3s;
 }
 
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(233, 69, 96, 0.1);
-}
+    /* box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(233, 69, 96, 0.1); */
+/* } */
 
 [data-theme="light"] .feature-card:hover {
     box-shadow: 0 12px 40px rgba(233, 69, 96, 0.08), 0 0 20px rgba(233, 69, 96, 0.05);
@@ -1436,8 +1436,8 @@ label.lbl {
     flex-direction: column;
 }
 
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(233, 69, 96, 0.15);
-}
+    /* box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(233, 69, 96, 0.15); */
+/* } */
 
 [data-theme="light"] .role-card-lp:hover {
     box-shadow: 0 20px 50px rgba(233, 69, 96, 0.08), 0 0 30px rgba(233, 69, 96, 0.04);

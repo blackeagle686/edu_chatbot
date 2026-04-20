@@ -170,7 +170,7 @@ class IRYMManager:
             "Sure! <THINKING>Planning the semester...</THINKING> <PLAN name=\"Spring Semester\">## Week 1\nIntroduction...</PLAN>\n\n"
             "Do NOT provide meta-commentary about your limitations. PERFORM THE TASK.\n"
             "</system_rules>"
-        )
+        
         
         memory_context = ""
         if hasattr(self, "memory_engine"):
