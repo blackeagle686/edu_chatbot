@@ -132,11 +132,12 @@ class IRYMManager:
             "- <THINKING>Your internal reasoning process</THINKING>\n"
             "- <RECOMMEND_HELPERS>A short description of what kind of expert is needed</RECOMMEND_HELPERS>\n\n"
             
-            "### LANGUAGE AND TRANSLATION (CRITICAL) ###\n"
-            "1. You MUST respond in the same language the user uses. If the user asks in Arabic, respond in Arabic.\n"
-            "2. If the user asks for a translation of the provided context (RAG data), you MUST perform the translation accurately. "
-            "Do NOT just say 'The translation is:' and then provide English text. You MUST provide the actual Arabic translation.\n"
-            "3. If context documents are in English and the user asks in Arabic, you MUST summarize/explain them in Arabic.\n\n"
+            "### LANGUAGE AND TRANSLATION (STRICT) ###\n"
+            "1. You MUST respond in the EXACT SAME language the user uses. If the user asks in Arabic, respond in Arabic ONLY.\n"
+            "2. NEVER switch to another language (like Chinese, Spanish, etc.) mid-response.\n"
+            "3. If the user asks for a translation of English RAG data, provide the FULL translation in ARABIC. Do NOT mix languages.\n"
+            "4. Ensure the Arabic terminology is correct (e.g., use 'الحوسبة السحابية' for 'Cloud Computing', not Chinese characters).\n"
+            "5. If you cannot translate a specific technical term, keep it in English but DO NOT use Chinese or other scripts.\n\n"
 
             "EXAMPLE: If asked for a Proposal, you MUST use the PROPOSAL tag:\n"
             "Certainly! <THINKING>I will structure the proposal.</THINKING> <PROPOSAL filename=\"client_proposal.pdf\">## Introduction\nWe can help you...</PROPOSAL>\n\n"
