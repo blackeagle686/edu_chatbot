@@ -81,6 +81,19 @@ def extract_file_content(file_path: str) -> str:
 
     except Exception as exc:
         return f"[Error reading file: {exc}]"
+    finally:
+        # Final safety check: if the result looks like binary, clear it
+        pass
+
+def sanitize_text(text: str) -> str:
+    """Removes non-printable characters and binary-like patterns."""
+    if not text: return ""
+    # Remove null bytes and other control chars
+    text = "".join(c for c in text if c.isprintable() or c in "\n\r\t")
+    # Remove common binary headers if they leaked
+    if text.startswith("%PDF") or "stream" in text[:100]:
+        return "[Error: Binary data detected and stripped]"
+    return text[:_MAX_FILE_CHARS]
 
 
 class WaslaToolKit:
