@@ -9,11 +9,10 @@ import uvicorn
 import shutil
 import uuid
 
-from api import ai_router, rec_router
+from api import ai_router
 
 app = FastAPI(title="Wasla Educational Chatbot")
 app.include_router(ai_router)
-app.include_router(rec_router)
 
 # Setup templates and static files
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
