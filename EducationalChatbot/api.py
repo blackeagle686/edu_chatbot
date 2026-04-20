@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from engine import irym_manager
@@ -111,3 +112,27 @@ async def api_ingest(request: IngestRequest):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+@ai_router.get("/download/{filename}")
+async def api_download(filename: str):
+    try:
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        
+        # Check docs folder
+        doc_path = os.path.join(BASE_DIR, "uploads", "docs", filename)
+        if not os.path.exists(doc_path):
+            # Check cvs folder
+            doc_path = os.path.join(BASE_DIR, "uploads", "cvs", filename)
+            
+        if not os.path.exists(doc_path):
+            raise HTTPException(status_code=404, detail="File not found")
+            
+        original_name = filename.split("_", 1)[-1] if "_" in filename else filename
+        return FileResponse(path=doc_path, filename=original_name, media_type='application/octet-stream')
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+

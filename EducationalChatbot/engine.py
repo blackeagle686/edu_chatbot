@@ -436,6 +436,65 @@ class IRYMManager:
         }
             
 
+    async def _process_tools_and_docs(self, raw_result: str):
+        """Processes XML-like tags for document generation and thinking."""
+        if not raw_result:
+            return "", [], ""
+            
+        cleaned_text = raw_result
+        
+        # 1. Extract Thinking
+        thoughts = self.toolkit.extract_tags(cleaned_text, "THINKING")
+        thinking_process = ""
+        if thoughts:
+            thinking_process = "\n".join([t["content"] for t in thoughts])
+            for t in thoughts:
+                cleaned_text = cleaned_text.replace(t["raw"], "")
+                
+        # 2. Process Document Tags
+        doc_tags = [
+            ("PDF", ".pdf", self.toolkit.generate_pdf),
+            ("DOC", ".docx", self.toolkit.generate_docx),
+            ("MD", ".md", self.toolkit.generate_markdown),
+            ("PLAN", ".md", self.toolkit.generate_plan),
+            ("CV", ".pdf", self.toolkit.generate_cv),
+            ("PROPOSAL", ".pdf", self.toolkit.generate_proposal),
+            ("SUMMARY", ".pdf", self.toolkit.generate_summary)
+        ]
+        
+        generated_docs = []
+        for tag, ext, generator_func in doc_tags:
+            matches = self.toolkit.extract_tags(cleaned_text, tag)
+            for m in matches:
+                filename = m["attr"] or f"document_{tag.lower()}{ext}"
+                try:
+                    # Note: generate_plan and generate_summary have different signatures (topic, content)
+                    if tag in ("PLAN", "SUMMARY"):
+                        unique_name = generator_func(m["attr"] or "Topic", m["content"])
+                    else:
+                        unique_name = generator_func(m["content"], filename)
+                        
+                    download_url = f"/download/{unique_name}"
+                    generated_docs.append({"name": filename, "url": download_url})
+                    
+                    # Clean up the text by removing the raw tag
+                    cleaned_text = cleaned_text.replace(m["raw"], "")
+                except Exception as e:
+                    print(f"[!] Error generating {tag}: {e}")
+                    
+        return cleaned_text.strip(), generated_docs, thinking_process
+
+    async def _process_helper_recommendations(self, text: str):
+        """Processes the <RECOMMEND_HELPERS> tag."""
+        if not text: return ""
+        
+        recs = self.toolkit.extract_tags(text, "RECOMMEND_HELPERS")
+        cleaned_text = text
+        for r in recs:
+            cleaned_text = cleaned_text.replace(r["raw"], "")
+            
+        return cleaned_text.strip()
+
     async def shutdown(self):
         """Cleans up IRYM resources."""
 irym_manager = IRYMManager()
