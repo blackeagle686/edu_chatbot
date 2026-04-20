@@ -1895,3 +1895,101 @@ footer .social-link:hover {
 @media (max-width: 768px) {
     .expand-sidebar-btn { display: none !important; }
 }
+
+/* ── Recommendations & Actions ── */
+.recommendation-container {
+    background: rgba(233, 69, 96, 0.05);
+    border-radius: 12px;
+    padding: 12px;
+    border-left: 4px solid var(--accent-red);
+    margin: 10px 0;
+}
+
+.recommendation-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-red);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.recommendation-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+.recommendation-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.recommendation-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.helper-mini-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 12px;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.helper-mini-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-3px);
+    border-color: var(--accent-red);
+}
+
+.helper-avatar-sm {
+    width: 35px;
+    height: 35px;
+    background: var(--bg-low);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-red);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.helper-info-sm .name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--txt-1);
+}
+
+.helper-info-sm .meta {
+    font-size: 0.7rem;
+    color: var(--txt-m);
+    margin-bottom: 8px;
+}
+
+.btn-hire-sm {
+    background: var(--accent-red);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    width: 100%;
+    transition: background 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-hire-sm:hover {
+    background: #c73e54;
+}
+
+.visible {
+    opacity: 1;
+    transform: none;
+}

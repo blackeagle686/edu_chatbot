@@ -201,6 +201,25 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
+    function appendCustomElement(element) {
+        if (!chatMessages) return;
+        const row = document.createElement('div');
+        row.classList.add('message-row');
+        
+        const avatar = document.createElement('div');
+        avatar.classList.add('msg-avatar', 'bot-av');
+        avatar.innerHTML = '<i class="fas fa-robot"></i>';
+        
+        const container = document.createElement('div');
+        container.style.flex = '1';
+        container.appendChild(element);
+        
+        row.appendChild(avatar);
+        row.appendChild(container);
+        chatMessages.appendChild(row);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
     function appendLoading() {
         if (!chatMessages) return null;
         const row = document.createElement('div');
@@ -288,9 +307,14 @@
                 chatMessages.removeChild(loadingRow);
             }
 
-            const reply = data.response
+            const reply = data.response || data.responseText
                 || ('Sorry, I encountered an error: ' + (data.error || 'Unknown error'));
             appendMessage(reply, 'bot', null, data.thinking);
+
+            // ── Handle Actions ──
+            if (data.actions && data.actions.length > 0) {
+                handleActions(data.actions);
+            }
 
             if (data.generated_docs && data.generated_docs.length > 0) {
                 const docsPanel = document.getElementById('docs-panel');
@@ -489,8 +513,89 @@
         };
     }
 
+    /* ── Action Handlers ── */
+    function handleActions(actions) {
+        actions.forEach(action => {
+            console.log("[*] Executing Action:", action.type);
+            
+            if (action.type === 'RECOMMEND_HELPERS') {
+                renderHelperRecommendations(action.payload);
+            } else if (action.type === 'GENERATE_DOCUMENT') {
+                if (action.payload.downloadUrl) {
+                    addDocToPanel(action.payload.filename || 'Generated Doc', action.payload.downloadUrl);
+                }
+            } else if (action.type === 'NAVIGATE_TO_PAGE') {
+                if (action.payload.url) {
+                    setTimeout(() => window.location.href = action.payload.url, 1500);
+                }
+            }
+        });
+    }
+
+    function renderHelperRecommendations(payload) {
+        const container = document.createElement('div');
+        container.className = 'recommendation-container mt-2';
+        
+        const title = document.createElement('div');
+        title.className = 'recommendation-title mb-2';
+        title.innerHTML = '<i class="fas fa-magic me-2 text-warning"></i>Recommended Experts';
+        container.appendChild(title);
+
+        const cardScroll = document.createElement('div');
+        cardScroll.className = 'recommendation-scroll';
+        
+        const helperIds = payload.helperIds || [];
+        helperIds.forEach(id => {
+            const card = document.createElement('div');
+            card.className = 'helper-mini-card';
+            card.innerHTML = `
+                <div class="helper-avatar-sm"><i class="fas fa-user-tie"></i></div>
+                <div class="helper-info-sm">
+                    <div class="name">Expert #${id}</div>
+                    <div class="meta">Highly Rated</div>
+                </div>
+                <button class="btn-hire-sm">View</button>
+            `;
+            cardScroll.appendChild(card);
+        });
+        
+        container.appendChild(cardScroll);
+        appendCustomElement(container);
+    }
+
+    function addDocToPanel(name, url) {
+        const docsPanel = document.getElementById('docs-panel');
+        const expandDocsBtn = document.getElementById('expand-docs-btn');
+        if (docsPanel) {
+            docsPanel.classList.remove('collapsed');
+            if (expandDocsBtn) expandDocsBtn.style.display = 'none';
+        }
+
+        const list = document.getElementById('generated-docs-list');
+        if (list) {
+            const div = document.createElement('div');
+            div.className = 'btn-group w-100 mb-2';
+
+            const previewBtn = document.createElement('button');
+            previewBtn.className = 'btn btn-sm btn-outline-light text-start text-truncate w-75';
+            previewBtn.innerHTML = `<i class="fas fa-eye text-info me-2"></i>${name}`;
+            previewBtn.onclick = () => previewDocument(url, name);
+
+            const downloadBtn = document.createElement('a');
+            downloadBtn.className = 'btn btn-sm btn-outline-light w-25 text-center';
+            downloadBtn.href = url;
+            downloadBtn.target = '_blank';
+            downloadBtn.innerHTML = `<i class="fas fa-download text-warning"></i>`;
+
+            div.appendChild(previewBtn);
+            div.appendChild(downloadBtn);
+            list.appendChild(div);
+        }
+    }
+
     /* ── Export for manual use if needed ── */
     window.previewDocument = previewDocument;
     window.appendMessage = appendMessage;
 
 })();
+

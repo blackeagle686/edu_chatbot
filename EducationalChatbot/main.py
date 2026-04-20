@@ -248,7 +248,7 @@ async def chat(
             except Exception as e:
                 print(f"[!] Background RAG ingestion error: {e}")
 
-        response, docs, thinking = await irym_manager.get_response(
+        response, docs, thinking, actions = await irym_manager.get_response(
             message, session_id=session_id, image_path=image_path, role=role, user_profile=user, file_content=file_content, file_name=file_name
         )
         
@@ -258,6 +258,7 @@ async def chat(
             "response": response, 
             "generated_docs": docs, 
             "thinking": thinking,
+            "actions": actions,
             "session_id": session_id
         })
     except Exception as e:

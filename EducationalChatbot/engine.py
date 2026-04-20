@@ -294,12 +294,12 @@ class IRYMManager:
                 new_resp = re.sub(r'<UPDATE_PROFILE.*?>.*?(?:</UPDATE_PROFILE>)?', '\n\n**Profile successfully updated.**\n', new_resp, flags=re.IGNORECASE | re.DOTALL)
         
         # 10. Process Helper Recommendations (if triggered by AI)
-        new_resp = await self._process_helper_recommendations(new_resp)
+        new_resp, rec_actions = await self._process_helper_recommendations(new_resp)
         
         if hasattr(self, "memory_engine"):
             await self.memory_engine.add_interaction(session_id, query, new_resp)
             
-        return new_resp, docs, thinking
+        return new_resp, docs, thinking, rec_actions
             
     async def get_api_response(self, query: str, userId: str, user_context: dict = None, system_context: dict = None, history: list = None, metadata: dict = None):
         """Main API entry point for .NET backend."""
@@ -544,15 +544,29 @@ class IRYMManager:
         return cleaned_text.strip(), generated_docs, thinking_process
 
     async def _process_helper_recommendations(self, text: str):
-        """Processes the <RECOMMEND_HELPERS> tag."""
-        if not text: return ""
+        """Processes the <RECOMMEND_HELPERS> tag and returns extracted actions."""
+        if not text: return "", []
         
         recs = self.toolkit.extract_tags(text, "RECOMMEND_HELPERS")
         cleaned_text = text
+        actions = []
+        
         for r in recs:
             cleaned_text = cleaned_text.replace(r["raw"], "")
             
-        return cleaned_text.strip()
+            # Simple extraction of numeric IDs if present
+            ids = [int(s) for s in re.findall(r'\b\d+\b', r["content"])][:3]
+            
+            actions.append({
+                "type": "RECOMMEND_HELPERS",
+                "priority": 1,
+                "payload": {
+                    "helperIds": ids if ids else [1, 2, 3],
+                    "reasoning": r["content"]
+                }
+            })
+            
+        return cleaned_text.strip(), actions
 
     async def shutdown(self):
         """Cleans up IRYM resources."""
