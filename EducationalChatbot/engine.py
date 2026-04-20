@@ -91,7 +91,7 @@ class IRYMManager:
         else:
             print("[!] No educational data found to ingest.")
 
-    async def get_response(self, query: str, session_id: str = "default_user", image_path: str = None, role: str = "user", user_profile: dict = None):
+    async def get_response(self, query: str, session_id: str = "default_user", image_path: str = None, role: str = "user", user_profile: dict = None, file_content: str = None, file_name: str = None):
         """Queries the RAG pipeline or VLM for a response."""
         import traceback
         
@@ -169,8 +169,20 @@ class IRYMManager:
             "\n\n[REMINDER: You are the AI Assistant. If the user asked for a file, use the <PDF>, <DOC>, <MD>, <PLAN>, <CV>, or <PROPOSAL> tags now. "
             "Do NOT provide meta-commentary or evaluate the solution. Simply PERFORM the task and provide the tags directly.]\n"
         )
+
+        # Inject uploaded file content directly into the prompt for analysis
+        file_block = ""
+        if file_content and file_content.strip():
+            fname_display = file_name or "uploaded_file"
+            file_block = (
+                f"\n\n[UPLOADED FILE: {fname_display}]\n"
+                f"--- FILE CONTENT START ---\n"
+                f"{file_content}\n"
+                f"--- FILE CONTENT END ---\n"
+                "The user has shared the file above. Read it carefully and use its content to answer the query below.\n"
+            )
         
-        refined_query = f"{memory_context}\n\n{role_instruction}{tool_reminder}\nUser Query: {query}"
+        refined_query = f"{memory_context}\n\n{role_instruction}{tool_reminder}{file_block}\nUser Query: {query}"
         
         raw_result = None
         
@@ -260,7 +272,7 @@ class IRYMManager:
             
         return new_resp, docs, thinking
             
-    async def get_api_response(self, query: str, session_id: str = "default_user", image_path: str = None, role: str = "user", user_profile: dict = None):
+    async def get_api_response(self, query: str, session_id: str = "default_user", image_path: str = None, role: str = "user", user_profile: dict = None, file_content: str = None, file_name: str = None):
         """Queries the RAG pipeline or VLM for a response."""
         import traceback
         
@@ -338,8 +350,20 @@ class IRYMManager:
             "\n\n[REMINDER: You are the AI Assistant. If the user asked for a file, use the <PDF>, <DOC>, <MD>, <PLAN>, <CV>, or <PROPOSAL> tags now. "
             "Do NOT provide meta-commentary or evaluate the solution. Simply PERFORM the task and provide the tags directly.]\n"
         )
-        
-        refined_query = f"{memory_context}\n\n{role_instruction}{tool_reminder}\nUser Query: {query}"
+
+        # Inject uploaded file content directly into the prompt for analysis
+        file_block = ""
+        if file_content and file_content.strip():
+            fname_display = file_name or "uploaded_file"
+            file_block = (
+                f"\n\n[UPLOADED FILE: {fname_display}]\n"
+                f"--- FILE CONTENT START ---\n"
+                f"{file_content}\n"
+                f"--- FILE CONTENT END ---\n"
+                "The user has shared the file above. Read it carefully and use its content to answer the query below.\n"
+            )
+
+        refined_query = f"{memory_context}\n\n{role_instruction}{tool_reminder}{file_block}\nUser Query: {query}"
         
         raw_result = None
         

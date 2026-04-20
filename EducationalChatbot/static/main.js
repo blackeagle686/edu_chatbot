@@ -52,85 +52,67 @@
     /* ── DOM refs ── */
     const chatForm = document.getElementById('chat-form');
     const userInput = document.getElementById('user-input');
-    const imageInput = document.getElementById('image-input');
+    const fileInput = document.getElementById('file-input');
     const chatMessages = document.getElementById('chat-messages');
     const imgPreviewC = document.getElementById('image-preview-container');
     const imgPreview = document.getElementById('image-preview');
+    const previewLabel = document.querySelector('.preview-label');
     const removeBtn = document.getElementById('remove-image-btn');
     const sendBtn = document.getElementById('send-btn');
     const welcomeTime = document.getElementById('welcome-time');
     const historyList = document.getElementById('history-list');
     const btnNewChat = document.getElementById('btn-new-chat');
 
-    let selectedImage = null;
+    let selectedFile = null;
+    let isFileDocument = false;
     let currentSessionId = '';
     let replyContext = '';
 
     /* ── Initialization ── */
     if (welcomeTime) welcomeTime.textContent = now();
 
-    /* ── Image Handling ── */
-    if (imageInput) {
-        imageInput.addEventListener('change', (e) => {
+    /* ── File Handling ── */
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            selectedImage = file;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                if (imgPreview) imgPreview.src = ev.target.result;
+            selectedFile = file;
+            
+            const isImage = file.type.startsWith('image/');
+            isFileDocument = !isImage;
+            
+            if (isImage) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    if (imgPreview) {
+                        imgPreview.src = ev.target.result;
+                        imgPreview.style.display = 'block';
+                    }
+                    if (previewLabel) previewLabel.innerHTML = '<i class="fas fa-image me-1"></i>Image ready to send';
+                    if (imgPreviewC) imgPreviewC.style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                if (imgPreview) imgPreview.style.display = 'none';
+                if (previewLabel) previewLabel.innerHTML = `<i class="fas fa-file-alt me-1 text-info"></i>Document ready: ${file.name}`;
                 if (imgPreviewC) imgPreviewC.style.display = 'flex';
-            };
-            reader.readAsDataURL(file);
+            }
         });
     }
 
     if (removeBtn) {
-        removeBtn.addEventListener('click', clearImage);
+        removeBtn.addEventListener('click', clearFile);
     }
 
-    function clearImage() {
-        selectedImage = null;
-        if (imageInput) imageInput.value = '';
+    function clearFile() {
+        selectedFile = null;
+        isFileDocument = false;
+        if (fileInput) fileInput.value = '';
         if (imgPreviewC) imgPreviewC.style.display = 'none';
-        if (imgPreview) imgPreview.src = '';
-    }
-
-    /* ── Document upload ── */
-    const docInput = document.getElementById('doc-input');
-    const docUploadTrigger = document.getElementById('doc-upload-trigger');
-
-    if (docInput && docUploadTrigger) {
-        docInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            docUploadTrigger.disabled = true;
-            docUploadTrigger.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const response = await fetch('/upload_doc', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-
-                if (data.status === 'success') {
-                    appendMessage(`✅ Document **${file.name}** uploaded and ingested successfully!`, 'bot');
-                } else {
-                    appendMessage(`❌ Error uploading document: ${data.error || 'Upload failed'}`, 'bot');
-                }
-            } catch (err) {
-                appendMessage(`❌ Connection error during document upload.`, 'bot');
-                console.error(err);
-            } finally {
-                docUploadTrigger.disabled = false;
-                docUploadTrigger.innerHTML = '<i class="fas fa-file-alt"></i>';
-                docInput.value = '';
-            }
-        });
+        if (imgPreview) {
+            imgPreview.src = '';
+            imgPreview.style.display = 'block';
+        }
     }
 
     /* ── Chat Functionality ── */
@@ -238,10 +220,10 @@
         if (isProcessing) return;
 
         const messageInput = userInput ? userInput.value.trim() : "";
-        if (!messageInput && !selectedImage) return;
+        if (!messageInput && !selectedFile) return;
 
         isProcessing = true;
-        let prompt = messageInput || 'Analyze this image.';
+        let prompt = messageInput || (isFileDocument ? 'Analyze this document.' : 'Analyze this image.');
         
         if (replyContext) {
             prompt = `[Replying to: "${replyContext}"]\n\n` + prompt;
@@ -250,13 +232,20 @@
             if (indicator) indicator.remove();
         }
         
-        const currentImage = selectedImage;
-        const imageUrl = currentImage ? URL.createObjectURL(currentImage) : null;
+        const currentFile = selectedFile;
+        const currentIsDocument = isFileDocument;
+        const imageUrl = (!currentIsDocument && currentFile) ? URL.createObjectURL(currentFile) : null;
 
-        appendMessage(prompt, 'user', imageUrl);
+        // Visual confirmation of document attached in user's chat bubble
+        let displayPrompt = prompt;
+        if (currentIsDocument && currentFile) {
+            displayPrompt = `📎 **Attached Document:** ${currentFile.name}\n\n${prompt}`;
+        }
+
+        appendMessage(displayPrompt, 'user', imageUrl);
 
         if (userInput) userInput.value = '';
-        clearImage();
+        clearFile();
 
         if (sendBtn) {
             sendBtn.disabled = true;
@@ -272,8 +261,12 @@
             if (currentSessionId) {
                 formData.append('session_id', currentSessionId);
             }
-            if (currentImage) {
-                formData.append('image', currentImage);
+            if (currentFile) {
+                if (currentIsDocument) {
+                    formData.append('document', currentFile);
+                } else {
+                    formData.append('image', currentFile);
+                }
             }
 
             const response = await fetch('/chat', {

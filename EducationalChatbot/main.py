@@ -200,6 +200,7 @@ async def chat(
     session_id: str = Form(""),
     role: str = Form("user"),
     image: UploadFile = File(None),
+    document: UploadFile = File(None),
     session: str = Cookie(default=None),
 ):
     user = _get_user(session)
@@ -218,6 +219,7 @@ async def chat(
     add_chat_message(session_id, "user", message)
 
     try:
+        # Handle Image Upload (VLM Path)
         image_path = None
         if image and image.filename:
             ext = os.path.splitext(image.filename)[1]
@@ -226,8 +228,29 @@ async def chat(
             with open(image_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
 
+        # Handle Document Upload (Analysis Path)
+        file_content = None
+        file_name = None
+        if document and document.filename:
+            from wasla_tools import extract_file_content
+            ext = os.path.splitext(document.filename)[1]
+            file_name = document.filename
+            safe_filename = f"{uuid.uuid4().hex[:8]}_{document.filename}"
+            doc_path = os.path.join(BASE_DIR, "uploads", "docs", safe_filename)
+            with open(doc_path, "wb") as buffer:
+                shutil.copyfileobj(document.file, buffer)
+                
+            # Extract content for instant chat analysis
+            file_content = extract_file_content(doc_path)
+            
+            # Also asynchronously ingest into RAG for future memory
+            try:
+                await irym_manager.rag.ingest(doc_path)
+            except Exception as e:
+                print(f"[!] Background RAG ingestion error: {e}")
+
         response, docs, thinking = await irym_manager.get_response(
-            message, session_id=session_id, image_path=image_path, role=role, user_profile=user
+            message, session_id=session_id, image_path=image_path, role=role, user_profile=user, file_content=file_content, file_name=file_name
         )
         
         add_chat_message(session_id, "bot", response)

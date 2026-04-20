@@ -3,6 +3,86 @@ import uuid
 import re
 from datetime import datetime
 
+# ── Maximum characters extracted from an uploaded file ────────────────────────
+_MAX_FILE_CHARS = 12_000
+
+
+def extract_file_content(file_path: str) -> str:
+    """
+    Extracts plain text from an uploaded file so it can be injected into the
+    LLM prompt for direct analysis.
+
+    Supported formats: PDF, DOCX, XLSX, CSV, TXT, MD
+    Returns an empty string on failure (with a note embedded).
+    """
+    ext = os.path.splitext(file_path)[1].lower()
+
+    try:
+        # ── PDF ──────────────────────────────────────────────────────────────
+        if ext == ".pdf":
+            try:
+                from pypdf import PdfReader
+            except ImportError:
+                try:
+                    from PyPDF2 import PdfReader  # legacy fallback
+                except ImportError:
+                    return "[PDF extraction unavailable — pypdf not installed]"
+            reader = PdfReader(file_path)
+            pages = []
+            for page in reader.pages:
+                text = page.extract_text()
+                if text:
+                    pages.append(text.strip())
+            return "\n\n".join(pages)[:_MAX_FILE_CHARS]
+
+        # ── DOCX ─────────────────────────────────────────────────────────────
+        elif ext == ".docx":
+            try:
+                from docx import Document
+            except ImportError:
+                return "[DOCX extraction unavailable — python-docx not installed]"
+            doc = Document(file_path)
+            paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+            return "\n".join(paragraphs)[:_MAX_FILE_CHARS]
+
+        # ── XLSX ─────────────────────────────────────────────────────────────
+        elif ext in (".xlsx", ".xls"):
+            try:
+                from openpyxl import load_workbook
+            except ImportError:
+                return "[XLSX extraction unavailable — openpyxl not installed]"
+            wb = load_workbook(file_path, read_only=True, data_only=True)
+            lines = []
+            for sheet in wb.worksheets:
+                lines.append(f"=== Sheet: {sheet.title} ===")
+                for row in sheet.iter_rows(values_only=True):
+                    row_vals = [str(c) if c is not None else "" for c in row]
+                    if any(v.strip() for v in row_vals):
+                        lines.append("\t".join(row_vals))
+            return "\n".join(lines)[:_MAX_FILE_CHARS]
+
+        # ── CSV ──────────────────────────────────────────────────────────────
+        elif ext == ".csv":
+            import csv
+            lines = []
+            with open(file_path, newline="", encoding="utf-8", errors="replace") as f:
+                reader = csv.reader(f)
+                for row in reader:
+                    lines.append(", ".join(row))
+            return "\n".join(lines)[:_MAX_FILE_CHARS]
+
+        # ── TXT / MD ─────────────────────────────────────────────────────────
+        elif ext in (".txt", ".md"):
+            with open(file_path, encoding="utf-8", errors="replace") as f:
+                return f.read()[:_MAX_FILE_CHARS]
+
+        else:
+            return f"[Unsupported file type: {ext}]"
+
+    except Exception as exc:
+        return f"[Error reading file: {exc}]"
+
+
 class WaslaToolKit:
     """
     Core toolset for document generation and structured output processing.
