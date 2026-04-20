@@ -745,6 +745,14 @@ body::after {
     backdrop-filter: blur(20px);
     border-left: 1px solid var(--brd);
     overflow-y: auto;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease, border-left-color 0.3s ease;
+}
+
+#docs-panel.collapsed {
+    width: 0;
+    padding: 0 !important;
+    border-left-color: transparent;
+    overflow: hidden;
 }
 
 #docs-panel h6 {
@@ -1732,6 +1740,13 @@ footer .social-link:hover {
     border-right: 1px solid var(--brd);
     flex-direction: column;
     overflow: hidden;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease, border-color 0.3s ease;
+}
+
+.history-sidebar.collapsed {
+    width: 0;
+    padding: 0 !important;
+    border-right-color: transparent;
 }
 
 [data-theme="light"] .history-sidebar {
@@ -1828,3 +1843,50 @@ footer .social-link:hover {
     font-style: italic;
 }
 [data-theme="light"] .reply-quote { background: rgba(0,0,0,0.03); }
+
+/* Sidebar Toggle Buttons */
+.sidebar-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--txt-m);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    transition: color 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-toggle-btn:hover {
+    color: var(--secondary);
+}
+
+.expand-sidebar-btn {
+    position: fixed;
+    bottom: 20px;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    background: var(--grad);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    display: none; /* Shown via JS */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.expand-sidebar-btn:hover {
+    transform: scale(1.1);
+}
+
+#expand-history-btn { left: 20px; }
+#expand-docs-btn { right: 20px; }
+
+@media (max-width: 768px) {
+    .expand-sidebar-btn { display: none !important; }
+}

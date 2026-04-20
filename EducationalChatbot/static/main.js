@@ -448,6 +448,38 @@
     
     fetchSessions(); // Init load
 
+    /* ── Sidebar Toggles ── */
+    const historySidebar = document.getElementById('history-sidebar');
+    const docsPanel = document.getElementById('docs-panel');
+    
+    const collapseHistoryBtn = document.getElementById('collapse-history-btn');
+    const expandHistoryBtn = document.getElementById('expand-history-btn');
+    
+    const collapseDocsBtn = document.getElementById('collapse-docs-btn');
+    const expandDocsBtn = document.getElementById('expand-docs-btn');
+
+    if (collapseHistoryBtn && expandHistoryBtn && historySidebar) {
+        collapseHistoryBtn.onclick = () => {
+            historySidebar.classList.add('collapsed');
+            expandHistoryBtn.style.display = 'flex';
+        };
+        expandHistoryBtn.onclick = () => {
+            historySidebar.classList.remove('collapsed');
+            expandHistoryBtn.style.display = 'none';
+        };
+    }
+
+    if (collapseDocsBtn && expandDocsBtn && docsPanel) {
+        collapseDocsBtn.onclick = () => {
+            docsPanel.classList.add('collapsed');
+            expandDocsBtn.style.display = 'flex';
+        };
+        expandDocsBtn.onclick = () => {
+            docsPanel.classList.remove('collapsed');
+            expandDocsBtn.style.display = 'none';
+        };
+    }
+
     /* ── Export for manual use if needed ── */
     window.previewDocument = previewDocument;
     window.appendMessage = appendMessage;

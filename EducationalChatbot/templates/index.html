@@ -76,7 +76,12 @@
         <div id="history-sidebar" class="history-sidebar d-none d-md-flex">
             <div class="history-header">
                 <h6><i class="fas fa-history me-2"></i>History</h6>
-                <button class="btn-new-chat" id="btn-new-chat" title="Start a new chat"><i class="fas fa-plus"></i></button>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn-new-chat" id="btn-new-chat" title="Start a new chat"><i class="fas fa-plus"></i></button>
+                    <button class="sidebar-toggle-btn" id="collapse-history-btn" title="Collapse history">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
             </div>
             <div class="history-list" id="history-list">
                 <div class="text-center p-3 text-muted" style="font-size: 0.8rem;">Loading history...</div>
@@ -149,8 +154,11 @@
 
         <!-- ───────────── Generated Documents Panel ───────────── -->
         <div id="docs-panel" class="d-none flex-column p-3">
-            <h6 class="border-bottom border-secondary pb-2 mb-3">
-                <i class="fas fa-folder-open me-2"></i>Session Documents
+            <h6 class="border-bottom border-secondary pb-2 mb-3 d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-folder-open me-2"></i>Session Documents</span>
+                <button class="sidebar-toggle-btn" id="collapse-docs-btn" title="Collapse documents">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </h6>
             <div id="generated-docs-list" class="d-flex flex-column gap-2">
                 <!-- Document links will be injected here -->
@@ -184,6 +192,14 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Floating Expand Buttons -->
+    <button id="expand-history-btn" class="expand-sidebar-btn" title="Expand history">
+        <i class="fas fa-history"></i>
+    </button>
+    <button id="expand-docs-btn" class="expand-sidebar-btn" title="Expand documents">
+        <i class="fas fa-folder-open"></i>
+    </button>
 
     <script src="/static/main.js"></script>
 </body>
