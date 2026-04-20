@@ -143,6 +143,7 @@ class IRYMManager:
             "- <PLAN name=\"title\">Plan details</PLAN>\n"
             "- <CV filename=\"name_cv.pdf\">CV details</CV>\n"
             "- <PROPOSAL filename=\"project_proposal.pdf\">Proposal details</PROPOSAL>\n"
+            "- <SUMMARY name=\"topic\">Summary details</SUMMARY>\n"
             "- <UPDATE_PROFILE full_name=\"Name\" email=\"email\" bio=\"New bio\">Updating...</UPDATE_PROFILE>\n"
             "- <THINKING>Your internal reasoning process</THINKING>\n"
             "- <RECOMMEND_HELPERS>Expert description</RECOMMEND_HELPERS>\n\n"
@@ -579,6 +580,26 @@ class IRYMManager:
             new_response = new_response.replace(p["raw"], download_link)
             generated_docs.append({"name": safe_display_name, "url": f"/download/{unique_name}"})
             
+        # 6. Process Summary Tag
+        summaries = self.toolkit.extract_tags(new_response, "SUMMARY")
+        for s in summaries:
+            topic = s["attr"] or "Topic"
+            content = s["content"]
+            try:
+                unique_name = self.toolkit.generate_summary(topic, content)
+                safe_display_name = topic.replace("_", " ").title()
+                
+                doc_path = os.path.join(self.toolkit.output_dir, unique_name)
+                if self.rag:
+                    try: await self.rag.ingest(doc_path)
+                    except: pass
+                    
+                download_link = f"\n\n**Summary Generated:** [{safe_display_name} Summary](/download/{unique_name})\n"
+                new_response = new_response.replace(s["raw"], download_link)
+                generated_docs.append({"name": f"{safe_display_name} Summary", "url": f"/download/{unique_name}"})
+            except Exception as e:
+                print(f"[!] Summary Generation Error: {e}")
+
         return new_response.strip(), generated_docs, thinking_process
 
     async def shutdown(self):

@@ -249,6 +249,18 @@ Generated on: {timestamp}
 """
         return self.generate_markdown(plan_content, f"Plan_{topic.replace(' ', '_')}")
 
+    def generate_summary(self, topic: str, content: str) -> str:
+        """Specialized tool for generating a structured summary document."""
+        summary_content = f"""# Executive Summary: {topic}
+---
+## Key Takeaways
+{content}
+
+---
+*Summarized by Wasla Edu Intelligence*
+"""
+        return self.generate_pdf(summary_content, f"Summary_{topic.replace(' ', '_')}")
+
     def generate_cv(self, content: str, filename: str) -> str:
         """Specialized tool for generating a professional CV/Resume."""
         try:

@@ -34,10 +34,18 @@
             modal.show();
 
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('File not found or network error');
-                const text = await response.text();
-                if (contentDiv) contentDiv.innerHTML = renderMarkdown(text);
+                if (url.toLowerCase().endsWith('.pdf')) {
+                    // Show PDF in an iframe
+                    if (contentDiv) {
+                        contentDiv.innerHTML = `<iframe src="${url}" width="100%" height="600px" style="border:none; border-radius: 8px;"></iframe>`;
+                    }
+                } else {
+                    // Show as Markdown/Text
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('File not found or network error');
+                    const text = await response.text();
+                    if (contentDiv) contentDiv.innerHTML = renderMarkdown(text);
+                }
             } catch (err) {
                 if (contentDiv) contentDiv.innerHTML = `<div class="alert alert-danger">Failed to load document preview. <br>${err.message}</div>`;
             }
