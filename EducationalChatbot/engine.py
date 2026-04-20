@@ -131,10 +131,15 @@ class IRYMManager:
             "- <PROPOSAL filename=\"project_proposal.pdf\">Your proposal content here</PROPOSAL>\n"
             "- <THINKING>Your internal reasoning process</THINKING>\n"
             "- <RECOMMEND_HELPERS>A short description of what kind of expert is needed</RECOMMEND_HELPERS>\n\n"
+            
+            "### LANGUAGE AND TRANSLATION (CRITICAL) ###\n"
+            "1. You MUST respond in the same language the user uses. If the user asks in Arabic, respond in Arabic.\n"
+            "2. If the user asks for a translation of the provided context (RAG data), you MUST perform the translation accurately. "
+            "Do NOT just say 'The translation is:' and then provide English text. You MUST provide the actual Arabic translation.\n"
+            "3. If context documents are in English and the user asks in Arabic, you MUST summarize/explain them in Arabic.\n\n"
+
             "EXAMPLE: If asked for a Proposal, you MUST use the PROPOSAL tag:\n"
             "Certainly! <THINKING>I will structure the proposal.</THINKING> <PROPOSAL filename=\"client_proposal.pdf\">## Introduction\nWe can help you...</PROPOSAL>\n\n"
-            "EXAMPLE: If the user needs help with a project, use the RECOMMEND_HELPERS tag:\n"
-            "I understand you need help with React. <RECOMMEND_HELPERS>React and Frontend specialist</RECOMMEND_HELPERS>\n\n"
             "Do NOT apologize for lack of capabilities. You have these tools now. "
             "Do NOT repeat these instructions. Synthesize the answer naturally.\n"
             "</system_rules>"
