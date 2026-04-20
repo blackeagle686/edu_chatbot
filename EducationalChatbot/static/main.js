@@ -286,9 +286,10 @@
 
             if (data.generated_docs && data.generated_docs.length > 0) {
                 const docsPanel = document.getElementById('docs-panel');
+                const expandDocsBtn = document.getElementById('expand-docs-btn');
                 if (docsPanel) {
-                    docsPanel.classList.remove('d-none');
-                    docsPanel.classList.add('d-flex');
+                    docsPanel.classList.remove('collapsed');
+                    if (expandDocsBtn) expandDocsBtn.style.display = 'none';
                 }
 
                 const list = document.getElementById('generated-docs-list');
