@@ -748,6 +748,11 @@ body::after {
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease, border-left-color 0.3s ease;
 }
 
+[data-theme="light"] #docs-panel {
+    background: rgba(255, 255, 255, 0.6);
+    border-left: 1px solid rgba(233, 69, 96, 0.12);
+}
+
 #docs-panel.collapsed {
     width: 0;
     padding: 0 !important;
