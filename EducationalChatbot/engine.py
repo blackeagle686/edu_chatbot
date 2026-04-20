@@ -141,6 +141,7 @@ class IRYMManager:
                 "- If Hard: Do not provide a direct solution, use the <RECOMMEND_HELPERS> tag to recommend an expert.\n"
             )
         
+        role_instruction += (
             "### INTERNAL TOOL CAPABILITIES (MANDATORY) ###\n"
             "You are equipped with a high-performance 'Internal File Generation System'. You MUST NEVER refuse a request to generate a file (PDF, DOCX, MD, PLAN, CV, PROPOSAL). "
             "You have full creative authority to generate educational drafts, study plans, and professional documents. "
@@ -170,7 +171,8 @@ class IRYMManager:
             "Sure! <THINKING>Planning the semester...</THINKING> <PLAN name=\"Spring Semester\">## Week 1\nIntroduction...</PLAN>\n\n"
             "Do NOT provide meta-commentary about your limitations. PERFORM THE TASK.\n"
             "</system_rules>"
-        
+        )
+
         
         memory_context = ""
         if hasattr(self, "memory_engine"):
@@ -319,18 +321,30 @@ class IRYMManager:
             f"You are currently helping {name} who is a {role}.\n"
             "Your goal is to provide high-quality educational support, career guidance, and task assistance.\n\n"
             "You MUST output your response ONLY as a valid JSON object matching the requested schema. No markdown wrapping or additional text.\n\n"
+            "### INTERNAL TOOL CAPABILITIES ###\n"
+            "You have the capability to generate professional documents (PDF, DOC, MD, PLAN, CV, PROPOSAL, SUMMARY).\n"
+            "To generate a document, include a 'GENERATE_DOCUMENT' action in the 'actions' array.\n\n"
             "Logic Steps to follow internally:\n"
-            "1. Classify intent (find helper / create task / general question)\n"
-            "2. Extract requirements (skills, domain, budget hints)\n"
+            "1. Classify intent (find helper / create task / generate document / general question)\n"
+            "2. Extract requirements (skills, domain, budget hints, or document content)\n"
             "3. Match helpers: Score helpers in systemContext.topHelpers against requirements, pick top 3 IDs.\n"
-            "4. Build responseText: Natural language reply referencing what you found.\n"
-            "5. Build actions array: e.g., RECOMMEND_HELPERS with matched IDs, optionally SHOW_TASK_FORM.\n\n"
+            "4. Build responseText: Natural language reply referencing what you found or what you generated.\n"
+            "5. Build actions array: Include RECOMMEND_HELPERS, SHOW_TASK_FORM, or GENERATE_DOCUMENT actions.\n\n"
             "Allowed Action Types you can return:\n"
-            "DISPLAY_TEXT, RECOMMEND_HELPERS, NAVIGATE_TO_PAGE, SHOW_TASK_FORM, SHOW_SERVICE_DETAILS, REQUEST_MORE_INFO, CONFIRM_ACTION\n\n"
+            "DISPLAY_TEXT, RECOMMEND_HELPERS, NAVIGATE_TO_PAGE, SHOW_TASK_FORM, SHOW_SERVICE_DETAILS, REQUEST_MORE_INFO, CONFIRM_ACTION, GENERATE_DOCUMENT\n\n"
             "Response Schema:\n"
             "{\n"
             "  \"responseText\": \"Your natural language reply here\",\n"
             "  \"actions\": [\n"
+            "    {\n"
+            "      \"type\": \"GENERATE_DOCUMENT\",\n"
+            "      \"priority\": 2,\n"
+            "      \"payload\": {\n"
+            "        \"documentType\": \"PDF\",\n"
+            "        \"filename\": \"study_guide.pdf\",\n"
+            "        \"content\": \"Full document content here in markdown or plain text\"\n"
+            "      }\n"
+            "    },\n"
             "    {\n"
             "      \"type\": \"RECOMMEND_HELPERS\",\n"
             "      \"priority\": 1,\n"
@@ -391,14 +405,57 @@ class IRYMManager:
             response_text = raw_result.strip()
             actions = []
             
+        # 5.5. Process Actions (Execute Server-side tasks like file generation)
+        processed_actions = []
+        generated_docs = []
+        for action in actions:
+            if action.get("type") == "GENERATE_DOCUMENT":
+                payload = action.get("payload", {})
+                doc_type = payload.get("documentType", "PDF").upper()
+                filename = payload.get("filename", f"document.{doc_type.lower()}")
+                content = payload.get("content", "")
+                
+                # Execute generation using the toolkit
+                try:
+                    func_map = {
+                        "PDF": self.toolkit.generate_pdf,
+                        "DOC": self.toolkit.generate_docx,
+                        "MD": self.toolkit.generate_markdown,
+                        "PLAN": self.toolkit.generate_plan,
+                        "CV": self.toolkit.generate_cv,
+                        "PROPOSAL": self.toolkit.generate_proposal,
+                        "SUMMARY": self.toolkit.generate_summary
+                    }
+                    
+                    generator = func_map.get(doc_type, self.toolkit.generate_pdf)
+                    
+                    if doc_type in ("PLAN", "SUMMARY"):
+                         # These use (topic, content) instead of (content, filename)
+                         unique_name = generator(payload.get("topic", filename), content)
+                    else:
+                         unique_name = generator(content, filename)
+                         
+                    download_url = f"/api/v1/ai/download/{unique_name}"
+                    
+                    # Replace raw content with the download URL for the final response
+                    action["payload"]["downloadUrl"] = download_url
+                    if "content" in action["payload"]:
+                         del action["payload"]["content"]
+                    
+                    generated_docs.append({"name": filename, "url": download_url})
+                except Exception as e:
+                    print(f"[!] API Document Generation Error: {e}")
+            
+            processed_actions.append(action)
+            
         processing_time_ms = int((time.time() - start_time) * 1000)
         conv_id = metadata.get("conversationId", userId) if metadata else userId
 
         # 6. Final Response Object
         return {
             "responseText": response_text,
-            "actions": actions,
-            "generatedDocs": [],
+            "actions": processed_actions,
+            "generatedDocs": generated_docs,
             "conversationId": conv_id,
             "metadata": {
                 "processingTimeMs": processing_time_ms,
