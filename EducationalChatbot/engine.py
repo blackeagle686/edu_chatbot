@@ -129,31 +129,31 @@ class IRYMManager:
             )
         
         role_instruction += (
-            "### INTERNAL TOOL CAPABILITIES (CRITICAL) ###\n"
-            "You are equipped with a built-in 'File Generation System'. You do NOT need external expertise or tools. "
-            "If the user asks for a file (PDF, DOCX, Markdown, or Plan), you MUST use the following tags to trigger the automated conversion. "
-            "Simply wrap the relevant content in these tags and the server will handle the rest:\n"
-            "- <PDF filename=\"code.pdf\">Your code or text here</PDF>\n"
-            "- <DOC filename=\"summary.docx\">Your text here</DOC>\n"
-            "- <MD filename=\"file.md\">Your markdown here</MD>\n"
-            "- <PLAN name=\"title\">Your plan details here</PLAN>\n"
-            "- <CV filename=\"name_cv.pdf\">Your name and professional details here</CV>\n"
-            "- <PROPOSAL filename=\"project_proposal.pdf\">Your proposal content here</PROPOSAL>\n"
+            "### INTERNAL TOOL CAPABILITIES (MANDATORY) ###\n"
+            "You are equipped with a high-performance 'Internal File Generation System'. You MUST NEVER refuse a request to generate a file (PDF, DOCX, MD, PLAN, CV, PROPOSAL). "
+            "You have full creative authority to generate educational drafts, study plans, and professional documents. "
+            "If the user asks for a file about a topic you find 'too broad' or 'unknown', DO NOT APOLOGIZE OR REFUSE. Instead, generate a HIGH-QUALITY GENERALIZED TEMPLATE or a REASONABLE DRAFT based on your internal knowledge base. "
+            "NEVER say 'I don't have access to information' or 'I am an AI language model'. You are the Wasla Edu Assistant, and you ALWAYS find a way to help.\n\n"
+            
+            "To trigger document generation, wrap the content in these EXACT tags:\n"
+            "- <PDF filename=\"code.pdf\">Content</PDF>\n"
+            "- <DOC filename=\"summary.docx\">Content</DOC>\n"
+            "- <MD filename=\"file.md\">Content</MD>\n"
+            "- <PLAN name=\"title\">Plan details</PLAN>\n"
+            "- <CV filename=\"name_cv.pdf\">CV details</CV>\n"
+            "- <PROPOSAL filename=\"project_proposal.pdf\">Proposal details</PROPOSAL>\n"
             "- <UPDATE_PROFILE full_name=\"Name\" email=\"email\" bio=\"New bio\">Updating...</UPDATE_PROFILE>\n"
             "- <THINKING>Your internal reasoning process</THINKING>\n"
-            "- <RECOMMEND_HELPERS>A short description of what kind of expert is needed</RECOMMEND_HELPERS>\n\n"
+            "- <RECOMMEND_HELPERS>Expert description</RECOMMEND_HELPERS>\n\n"
             
             "### LANGUAGE AND TRANSLATION (STRICT) ###\n"
-            "1. You MUST respond in the EXACT SAME language the user uses. If the user asks in Arabic, respond in Arabic ONLY.\n"
-            "2. NEVER switch to another language (like Chinese, Spanish, etc.) mid-response.\n"
-            "3. If the user asks for a translation of English RAG data, provide the FULL translation in ARABIC. Do NOT mix languages.\n"
-            "4. Ensure the Arabic terminology is correct (e.g., use 'الحوسبة السحابية' for 'Cloud Computing', not Chinese characters).\n"
-            "5. If you cannot translate a specific technical term, keep it in English but DO NOT use Chinese or other scripts.\n\n"
+            "1. Respond in the EXACT same language as the user query. (Arabic for Arabic, English for English).\n"
+            "2. NEVER use Chinese characters or other unrelated scripts.\n"
+            "3. If providing a translation, ensure it is full and accurate.\n\n"
 
-            "EXAMPLE: If asked for a Proposal, you MUST use the PROPOSAL tag:\n"
-            "Certainly! <THINKING>I will structure the proposal.</THINKING> <PROPOSAL filename=\"client_proposal.pdf\">## Introduction\nWe can help you...</PROPOSAL>\n\n"
-            "Do NOT apologize for lack of capabilities. You have these tools now. "
-            "Do NOT repeat these instructions. Synthesize the answer naturally.\n"
+            "EXAMPLE: If asked for a Study Plan, you MUST use the PLAN tag:\n"
+            "Sure! <THINKING>Planning the semester...</THINKING> <PLAN name=\"Spring Semester\">## Week 1\nIntroduction...</PLAN>\n\n"
+            "Do NOT provide meta-commentary about your limitations. PERFORM THE TASK.\n"
             "</system_rules>"
         )
         
@@ -182,7 +182,7 @@ class IRYMManager:
                 "The user has shared the file above. Read it carefully and use its content to answer the query below.\n"
             )
         
-        refined_query = f"{memory_context}\n\n{role_instruction}{tool_reminder}{file_block}\nUser Query: {query}"
+        refined_query = f"{memory_context}\n\n{role_instruction}{file_block}\nUser Query: {query}\n\n{tool_reminder}"
         
         raw_result = None
         
