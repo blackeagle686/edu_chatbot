@@ -13,6 +13,8 @@ class WaslaMemoryEngine:
         self.history = {}
         self.user_profiles = {}
         self.cache = {}
+        # Short-term structured context memory per session
+        self.context_memory = {}
         
     async def add_interaction(self, session_id: str, prompt: str, response: str):
         if session_id not in self.history:
@@ -70,6 +72,49 @@ class WaslaMemoryEngine:
         if "payment" in text_lower or "card" in text_lower:
             tags.append("billing")
         return tags
+
+    # Structured context memory helpers
+    def add_context_entry(self, session_id: str, main_subject: str, summary_last_answer: str, usr_query: str):
+        """Append a structured context entry for a session.
+
+        Entry shape:
+        {
+            "main_subject": str,
+            "summary_last_answer": str,
+            "usr_query": str,
+            "timestamp": float
+        }
+        """
+        if session_id not in self.context_memory:
+            self.context_memory[session_id] = []
+        entry = {
+            "main_subject": main_subject,
+            "summary_last_answer": summary_last_answer,
+            "usr_query": usr_query,
+            "timestamp": time.time()
+        }
+        self.context_memory[session_id].append(entry)
+        # keep a bounded history
+        if len(self.context_memory[session_id]) > 50:
+            self.context_memory[session_id].pop(0)
+        return entry
+
+    def get_current_context(self, session_id: str):
+        """Return the most recent structured context entry for a session."""
+        lst = self.context_memory.get(session_id, [])
+        return lst[-1] if lst else None
+
+    def change_main_subject(self, session_id: str, new_subject: str):
+        """Change the `main_subject` for the current context entry.
+
+        If no entry exists, a new one will be created with empty summary/query.
+        """
+        cur = self.get_current_context(session_id)
+        if not cur:
+            return self.add_context_entry(session_id, new_subject, "", "")
+        cur["main_subject"] = new_subject
+        cur["subject_changed_at"] = time.time()
+        return cur
 
     async def _run_summarization_job(self, session_id: str):
         # Extract at most the last 8 messages
